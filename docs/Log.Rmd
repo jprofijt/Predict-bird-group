@@ -1,0 +1,24 @@
+---
+# title: "Predicting Bird groups based on their bone measurements"
+author: "Jouke Profijt"
+date: "September 11, 2018"
+output: pdf_document
+---
+```{r}
+#Copyright (c) 2018 Jouke Profijt.
+#Licensed under GPLv3. See gpl.md
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+BirdBones <- read.csv("bird.csv",header = T, sep = ",")
+```
+
+# Introduction
+
+# Research Question
+    Are the bones of birds significantly distinct per group/functioning of birds, and can we use them to identify unknown fossils?
