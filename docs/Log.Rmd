@@ -21,4 +21,4 @@ BirdBones <- read.csv("bird.csv",header = T, sep = ",")
 # Introduction
 
 # Research Question
-    Are the bones of birds significantly distinct per group/functioning of birds, and can we use them to identify unknown fossils?
+   What bone or group of bones that most birds have in common, is the most significant for the function in the diffrent ecological groups?
