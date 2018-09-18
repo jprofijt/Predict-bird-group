@@ -3,6 +3,7 @@
 author: "Jouke Profijt"
 date: "September 11, 2018"
 output: pdf_document
+
 ---
 ```{r}
 #Copyright (c) 2018 Jouke Profijt.
@@ -11,14 +12,56 @@ output: pdf_document
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+tidy.opts=list(width.cutoff=60),tidy=TRUE)
 ```
 
 ```{r}
-BirdBones <- read.csv("bird.csv",header = T, sep = ",")
+BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 ```
 
 # Introduction
 
-# Research Question
-    Are the bones of birds significantly distinct per group/functioning of birds, and can we use them to identify unknown fossils?
+## Research Question
+    Are the bones of birds significantly distinct per group/functioning of birds, and can we use them to identify the ecological group of unknown fossils?
+    
+## Data
+    Data recieved from  [Birds' Bones and Living Habits](https://www.kaggle.com/zhangjuefei/birds-bones-and-living-habits)
+    
+    Bone measurements were measured from a skeleton collection of Natural History Museum of Los Angeles County, 
+    provided by Dr. D. Liu of beijing Museaum of Natural History
+    
+# Exploratory Data Analyses
+
+
+```{r Grouping all birds}
+# Swimming
+SW <- BirdBones[BirdBones$type == "SW",]
+# Wading
+W <- BirdBones[BirdBones$type == "W",]
+# Terrestial
+TER <- BirdBones[BirdBones$type == "T",]
+# Raptors
+R <- BirdBones[BirdBones$type == "R",]
+# Scansorial
+P <- BirdBones[BirdBones$type == "P",]
+# Singing
+SO <- BirdBones[BirdBones$type == "SO",]
+
+```
+```{r}
+source("../scripts/BoneMeans.R")
+dataMeans <- BoneMeans(BirdBones)
+hist(SO$huml, breaks = 15)
+```
+
+```{r Swimming Birds}
+boxplot(SW, main = "Bone Lenght Swimming Birds", 
+        xlab = "Bone", ylab = "Length in mm", las=2)
+
+
+```
+
+    
+    
+    
