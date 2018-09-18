@@ -33,32 +33,14 @@ BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 # Exploratory Data Analyses
 
 
-```{r Grouping all birds}
-# Swimming
-SW <- BirdBones[BirdBones$type == "SW", 1:11]
-# Wading
-W <- BirdBones[BirdBones$type == "W", 1:11]
-# Terrestial
-TER <- BirdBones[BirdBones$type == "T", 1:11]
-# Raptors
-R <- BirdBones[BirdBones$type == "R", 1:11]
-# Scansorial
-P <- BirdBones[BirdBones$type == "P",1:11]
-# Singing
-SO <- BirdBones[BirdBones$type == "SO",1:11]
 
-```
-```{r}
-source("../scripts/BoneMeans.R")
-dataMeans <- BoneMeans(BirdBones)
-hist(SW$huml, breaks = 15)
-```
+
 
 ```{r Swimming Birds}
 boxplot(SW[2:11], las = 2)
 
 ```
-I'm creating a dotplot which displays the bonelengths on x axis an the Id on y colorcoded by their ecological group. by evaluating this we can see if some groups have overall larger or smaller bones.
+I'm creating a graph which displays the bonelengths on y axis an the Id on x colorcoded by their ecological group. by evaluating this we can see if some groups have overall larger or smaller bones and we see if there are big outliers.
 
 ```{r}
 library(ggplot2)
