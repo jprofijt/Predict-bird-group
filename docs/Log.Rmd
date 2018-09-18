@@ -35,31 +35,43 @@ BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 
 ```{r Grouping all birds}
 # Swimming
-SW <- BirdBones[BirdBones$type == "SW",]
+SW <- BirdBones[BirdBones$type == "SW", 1:11]
 # Wading
-W <- BirdBones[BirdBones$type == "W",]
+W <- BirdBones[BirdBones$type == "W", 1:11]
 # Terrestial
-TER <- BirdBones[BirdBones$type == "T",]
+TER <- BirdBones[BirdBones$type == "T", 1:11]
 # Raptors
-R <- BirdBones[BirdBones$type == "R",]
+R <- BirdBones[BirdBones$type == "R", 1:11]
 # Scansorial
-P <- BirdBones[BirdBones$type == "P",]
+P <- BirdBones[BirdBones$type == "P",1:11]
 # Singing
-SO <- BirdBones[BirdBones$type == "SO",]
+SO <- BirdBones[BirdBones$type == "SO",1:11]
 
 ```
 ```{r}
 source("../scripts/BoneMeans.R")
 dataMeans <- BoneMeans(BirdBones)
-hist(SO$huml, breaks = 15)
+hist(SW$huml, breaks = 15)
 ```
 
 ```{r Swimming Birds}
-boxplot(SW, main = "Bone Lenght Swimming Birds", 
-        xlab = "Bone", ylab = "Length in mm", las=2)
-
+boxplot(SW[2:11], las = 2)
 
 ```
+I'm creating a dotplot which displays the bonelengths on x axis an the Id on y colorcoded by their ecological group. by evaluating this we can see if some groups have overall larger or smaller bones.
 
+```{r}
+library(ggplot2)
+library(reshape)
+source("../scripts/BoneMeans.R")
+BirdBones <- BoneMeans(BirdBones)
+ggplot(data = BirdBones, aes(id, means, colour = type)) +
+  ggtitle("Bone lenghts per Ecological group")+
+  ylab("Mean lenght of total bird bones in mm") +
+  xlab("Bird Sample")+
+  geom_point()
+```
+As seen above swimming birds have the biggest bones, but also shown is that there are a lot more samples in that group where there is a lot of variation. I can look into cleaning up the data and removing the biggest outliers in this group. Singing birds also have a lot of samples but there is much less variation and so more certanty. 
 
+For the rest of the birds there are not a lot of sample so maby we could try and normalizing the data so there is an even amount of samples per group.
 

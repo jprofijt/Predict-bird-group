@@ -3,11 +3,14 @@
 
 # Will calculate means for all bones separated by their ecological groups.
 
-means <- list()
-
+means <- c()
 BoneMeans <- function(data) {
-  for(t in levels(unique(data$type))){
-    means[[t]] <- colMeans(data[data$type == t,2:11])
+  for(t in data$id){
+    value <- mean(as.numeric(data[data$id == t, 2:11]))
+    means <- append(means, value)
+    
+  
   }
-  return(means)
+  data$means <- means
+  return(data)
 }
