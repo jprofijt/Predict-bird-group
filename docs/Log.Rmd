@@ -21,9 +21,8 @@ BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 ```
 
 # Introduction
-
-## Research Question
-    Are the bones of birds significantly distinct per group/functioning of birds, and can we use them to identify the ecological group of unknown fossils?
+# Research Question
+   What bone or group of bones that most birds have in common, is the most significant for the function in the diffrent ecological groups?
     
 ## Data
     Data recieved from  [Birds' Bones and Living Habits](https://www.kaggle.com/zhangjuefei/birds-bones-and-living-habits)
@@ -62,6 +61,5 @@ boxplot(SW, main = "Bone Lenght Swimming Birds",
 
 ```
 
-# Research Question
-   What bone or group of bones that most birds have in common, is the most significant for the function in the diffrent ecological groups?
+
 
