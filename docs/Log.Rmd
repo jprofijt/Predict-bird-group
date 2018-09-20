@@ -7,7 +7,7 @@ output: pdf_document
 ---
 ```{r}
 #Copyright (c) 2018 Jouke Profijt.
-#Licensed under GPLv3. See gpl.md
+#Licensed under GPLv3. See LICENCE
 ```
 
 
@@ -55,11 +55,16 @@ Most samples have data for:
 I'm creating a graph which displays the bonelengths on y axis an the Id on x colorcoded by their ecological group. by evaluating this we can see if some groups have overall larger or smaller bones and we see if there are big outliers.
 
 ```{r}
+# this omits several ggplot2 errors retaining to mising values
+BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
+```
+
+```{r}
 library(ggplot2)
 library(reshape)
 source("../scripts/BoneMeans.R")
-BirdBones <- BoneMeans(BirdBones)
-ggplot(data = BirdBones, aes(id, length.mean, colour = type)) +
+BirdBones.noNA <- BoneMeans(BirdBones.noNA)
+ggplot(data = BirdBones.noNA, aes(id, length.mean, colour = type)) +
   ggtitle("Bone lenghts per Ecological group")+
   ylab("Mean lenght of total bird bones in mm") +
   xlab("Bird Sample")+
@@ -74,7 +79,7 @@ There are also 7 samples that contain missing values, we could just straight out
 ```{r}
 library(ggplot2)
 
-ggplot(BirdBones, aes(x = type, y = length.mean, color = type)) +
+ggplot(BirdBones.noNA, aes(x = type, y = length.mean, color = type)) +
   geom_boxplot()+
   coord_flip()+
   ggtitle("Boxplot for each ecological group's mean bone lenght")+
@@ -83,4 +88,13 @@ ggplot(BirdBones, aes(x = type, y = length.mean, color = type)) +
 ```
 
 As you can see there are quite a few outliers in all groups except in group R ()
+```{r}
+library(ggplot2)
+ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
+  geom_point()+
+  geom_smooth(method = lm)+
+  ggtitle("Corelation between bone diameter & bone length")+
+  xlab("Mean bone lenght in mm")+
+  ylab("Mean bone diameter in mm")
+```
 
