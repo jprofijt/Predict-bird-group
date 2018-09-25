@@ -114,6 +114,16 @@ ggplot(BirdBones.noNA, aes(x = type, y = length.mean, color = type)) +
 
 As you can see there are quite a few outliers in all groups except in group R, The raptors. but we saw in the above boxplot that there were loads of outliers between all bones, yet here that is significantly reduced. so if we are going to inspect the date we have to look at them per group and NOT by bone type.
 
+What we can also see in these plots are which birds are most likely the largest, as seen above color cyan or SW or Swimming Birds are the biggest of them all closely followed by W or Wading Birds
+```{r}
+ggplot(BirdBones.noNA,aes(x=length.mean,y=diameter.mean,color=type))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle("mean lenght in mm vs mean diameter in mm")+
+  xlab("Mean Lenght in mm")+
+  ylab("Mean Diameter in mm")
+```
+
 ```{r}
 library(ggplot2)
 ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
@@ -125,6 +135,9 @@ ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
 ```
 As expected there is a coralation between the bone lenght and bone diameter, you can see this because the plot gives a liniar line.
 it does make a lot of sense if you have longer bones there you will most likely also have thicker bones(bigger diameters)
+
+
+
 
 ```{r}
 # m <- as.matrix(BirdBones.noNA$length.mean, ncol=2)
