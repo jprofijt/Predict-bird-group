@@ -84,14 +84,17 @@ There are also 7 samples that contain missing values, we could just straight out
 ```{r}
 library(ggplot2)
 
-boxplot(BirdBones[length], 
-        main = "Boxplot of bird Bone lengths",
-        xlab = "Bone",
-        ylab = "lenght in mm")
-boxplot(BirdBones[diameter],
-        main = "Boxplots of Bird Bone diameters",
-        xlab = "bone",
-        ylab = "diameter in mm")
+ggplot(stack(BirdBones.noNA[length]), aes(x = ind, y = values, color = ind)) +
+  geom_boxplot()+
+  ggtitle("Boxplot for bone lenghts per bone in mm")+
+  xlab("Bone Type")+
+  ylab("Length in mm")
+
+ggplot(stack(BirdBones.noNA[diameter]), aes(x = ind, y = values, color = ind)) +
+  geom_boxplot()+
+  ggtitle("Boxplot for bone diameter per bone in mm")+
+  xlab("Bone Type")+
+  ylab("diameter in mm")
 ```
 
 
@@ -112,7 +115,7 @@ library(ggplot2)
 ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
   geom_point()+
   geom_smooth(method = lm)+
-  ggtitle("Corelation between bone diameter & bone length")+
+  ggtitle("Log10 transformed Corelation between bone diameter & bone length")+
   xlab("Mean bone lenght in mm")+
   ylab("Mean bone diameter in mm")
 ```
@@ -120,22 +123,22 @@ As expected there is a coralation between the bone lenght and bone diameter, you
 it does make a lot of sense if you have longer bones there you will most likely also have thicker bones(bigger diameters)
 
 ```{r}
-m <- as.matrix(BirdBones.noNA$length.mean, ncol=2)
+# m <- as.matrix(BirdBones.noNA$length.mean, ncol=2)
 # 6 groups so 6 clusters is assumed
-cl <- kmeans(m, 6)
-
-```
-```{r}
-BirdBones.noNA$cluster <- factor(cl$cluster)
-centers <- as.data.frame((cl$centers))
-```
-```{r}
-library(ggplot2)
-
-
-ggplot(data=BirdBones.noNA, aes(x=length.mean, y=id, color=type )) + 
- geom_point() + 
- geom_point(data=centers, aes(x=V1,y=V2, color='Center')) +
- geom_point(data=centers, aes(x=V1,y=V2, color='Center'), size=50, alpha=.4, legend=FALSE)
+# cl <- kmeans(m, 6)
+# 
+# ```
+# ```{r}
+# BirdBones.noNA$cluster <- factor(cl$cluster)
+# centers <- as.data.frame((cl$centers))
+# ```
+# ```{r}
+# library(ggplot2)
+# 
+# 
+# ggplot(data=BirdBones.noNA, aes(x=length.mean, y=id, color=type )) + 
+#  geom_point() + 
+#  geom_point(data=centers, aes(x=V1,y=V2, color='Center')) +
+#  geom_point(data=centers, aes(x=V1,y=V2, color='Center'), size=50, alpha=.4, legend=FALSE)
 ```
 
