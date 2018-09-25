@@ -97,6 +97,7 @@ ggplot(stack(BirdBones.noNA[diameter]), aes(x = ind, y = values, color = ind)) +
   ylab("diameter in mm")
 ```
 
+What we see above is that there are a considerable amount of outliers between the bones themselves, but this was expected as they are from diffrent groups and the diffrent groups dont have the same amount of measurements. below i will do a comparison between the group bone mean lengths which will show outliers in their respective group.
 
 ```{r}
 library(ggplot2)
@@ -109,7 +110,8 @@ ggplot(BirdBones.noNA, aes(x = type, y = length.mean, color = type)) +
   xlab("ecological group")
 ```
 
-As you can see there are quite a few outliers in all groups except in group R, The raptors. 
+As you can see there are quite a few outliers in all groups except in group R, The raptors. but we saw in the above boxplot that there were loads of outliers between all bones, yet here that is significantly reduced. so if we are going to inspect the date we have to look at them per group and NOT by bone type.
+
 ```{r}
 library(ggplot2)
 ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
