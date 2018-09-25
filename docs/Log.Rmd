@@ -18,6 +18,9 @@ tidy.opts=list(width.cutoff=60),tidy=TRUE)
 
 ```{r}
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
+#respective collums for the lenght and diameter
+length <- c(2,4,6,8,10)
+diameter <- c(3,5,7,9,11)
 ```
 
 # Introduction
@@ -59,6 +62,8 @@ I'm creating a graph which displays the bonelengths on y axis an the Id on x col
 BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
 ```
 
+there are 420 total measurements, and by using complete cases i found that there are 413 measurements which are complete and do not contain missing values, aka > there are 7 measurements that contain missing values.
+
 ```{r}
 library(ggplot2)
 library(reshape)
@@ -79,6 +84,20 @@ There are also 7 samples that contain missing values, we could just straight out
 ```{r}
 library(ggplot2)
 
+boxplot(BirdBones[length], 
+        main = "Boxplot of bird Bone lengths",
+        xlab = "Bone",
+        ylab = "lenght in mm")
+boxplot(BirdBones[diameter],
+        main = "Boxplots of Bird Bone diameters",
+        xlab = "bone",
+        ylab = "diameter in mm")
+```
+
+
+```{r}
+library(ggplot2)
+
 ggplot(BirdBones.noNA, aes(x = type, y = length.mean, color = type)) +
   geom_boxplot()+
   coord_flip()+
@@ -87,7 +106,7 @@ ggplot(BirdBones.noNA, aes(x = type, y = length.mean, color = type)) +
   xlab("ecological group")
 ```
 
-As you can see there are quite a few outliers in all groups except in group R ()
+As you can see there are quite a few outliers in all groups except in group R, The raptors. 
 ```{r}
 library(ggplot2)
 ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
@@ -96,5 +115,27 @@ ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
   ggtitle("Corelation between bone diameter & bone length")+
   xlab("Mean bone lenght in mm")+
   ylab("Mean bone diameter in mm")
+```
+As expected there is a coralation between the bone lenght and bone diameter, you can see this because the plot gives a liniar line.
+it does make a lot of sense if you have longer bones there you will most likely also have thicker bones(bigger diameters)
+
+```{r}
+m <- as.matrix(BirdBones.noNA$length.mean, ncol=2)
+# 6 groups so 6 clusters is assumed
+cl <- kmeans(m, 6)
+
+```
+```{r}
+BirdBones.noNA$cluster <- factor(cl$cluster)
+centers <- as.data.frame((cl$centers))
+```
+```{r}
+library(ggplot2)
+
+
+ggplot(data=BirdBones.noNA, aes(x=length.mean, y=id, color=type )) + 
+ geom_point() + 
+ geom_point(data=centers, aes(x=V1,y=V2, color='Center')) +
+ geom_point(data=centers, aes(x=V1,y=V2, color='Center'), size=50, alpha=.4, legend=FALSE)
 ```
 
