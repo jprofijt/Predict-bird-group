@@ -73,7 +73,7 @@ there are 420 total measurements, and by using complete cases i found that there
 library(ggplot2)
 library(reshape)
 source("../scripts/BoneMeans.R")
-BirdBones.noNA <- BoneMeans(BirdBones.noNA)
+BirdBones.noNA <- BoneMeans(data = BirdBones.noNA, length = length, diameter = diameter)
 ggplot(data = BirdBones.noNA, aes(id, length.mean, colour = type)) +
   ggtitle("Bone lenghts per Ecological group")+
   ylab("Mean lenght of total bird bones in mm") +
@@ -107,9 +107,17 @@ What we see above is that there are a considerable amount of outliers between th
 As we can see the femur lenght and taesometatarsus length do not contain a lot of variation and maby are candidates for exclution from analysis.
 
 ```{r}
+# diameter & lenght indexes for only the longer bones.
+length.long <- c(2, 4, 8)
+diameter.long <- c(3, 5, 9)
+BirdBones.noNA.long <- BoneMeans(BirdBones.noNA, length.long, diameter.long)
+
+```
+
+```{r}
 library(ggplot2)
 
-ggplot(BirdBones.noNA, aes(x = type, y = length.mean, color = type)) +
+ggplot(BirdBones.noNA.long, aes(x = type, y = length.mean, color = type)) +
   geom_boxplot()+
   coord_flip()+
   ggtitle("Boxplot for each ecological group's mean bone lenght")+
@@ -121,27 +129,56 @@ As you can see there are quite a few outliers in all groups except in group R, T
 
 What we can also see in these plots are which birds are most likely the largest, as seen above color cyan or SW or Swimming Birds are the biggest of them all closely followed by W or Wading Birds
 ```{r}
-ggplot(BirdBones.noNA,aes(x=length.mean,y=diameter.mean,color=type))+
+ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
   geom_point()+
   geom_smooth()+
-  ggtitle("mean lenght in mm vs mean diameter in mm")+
-  xlab("Mean Lenght in mm")+
-  ylab("Mean Diameter in mm")
+  ggtitle("mean lenght vs mean diameter")+
+  xlab("Mean Lenght")+
+  ylab("Mean Diameter")
 ```
 
 Untransformed datapoints separated by goup, again here we can see which birds are the biggest, but for smaller birds this plot is not very readable. we do see something odd, where T has a climbing line around lenght 50, other birds have a decreasing line. also Swimming Birds have some results that are very diffrent form their mean line.
 
+
+
 ```{r}
+ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle("mean lenght vs mean diameter For Humerus, Ulna and Tibiotarsus")+
+  xlab("Mean Lenght")+
+  ylab("Mean Diameter")
+```
+```{r}
+BirdBones.noNA.long$log2length <- log2(BirdBones.noNA.long$length.mean)
+BirdBones.noNA.long$log2diameter <- log2(BirdBones.noNA.long$diameter.mean)
+
 library(ggplot2)
-ggplot(BirdBones.noNA, aes(x = log(length.mean), y = log(diameter.mean))) +
+ggplot(BirdBones.noNA.long, aes(x = log2length, y = log2diameter)) +
   geom_point()+
   geom_smooth(method = lm)+
-  ggtitle("Log10 transformed Corelation between bone diameter & bone length")+
-  xlab("Mean bone lenght in mm")+
-  ylab("Mean bone diameter in mm")
+  ggtitle("Log2 transformed Corelation between bone diameter & bone length")+
+  xlab("Mean bone lenght")+
+  ylab("Mean bone diameter")
 ```
 As expected there is a coralation between the bone lenght and bone diameter, you can see this because the plot gives a liniar line.
 it does make a lot of sense if you have longer bones there you will most likely also have thicker bones(bigger diameters)
+
+We can also see a couple of outliers in the scatter plot above. we can try and isolate these samples and take a closer look.
+
+```{r}
+
+
+ggplot(BirdBones.noNA.long,aes(x=log2length,y=log2diameter,color=type))+
+  geom_point()+
+  ggtitle(" Log2 transformed mean lenght vs mean diameter For Humerus, Ulna and Tibiotarsus")+
+  xlab("Mean Lenght")+
+  ylab("Mean Diameter")
+```
+Same plot as above but colorcoded so we can see to which group the outliers belong.
+
+
+
 
 
 
@@ -160,9 +197,23 @@ it does make a lot of sense if you have longer bones there you will most likely 
 # library(ggplot2)
 # 
 # 
-# ggplot(data=BirdBones.noNA, aes(x=length.mean, y=id, color=type )) + 
+# ggplot(data=BirdBones.noNA, aes(x=length.me43an, y=id, color=type )) + 
 #  geom_point() + 
 #  geom_point(data=centers, aes(x=V1,y=V2, color='Center')) +
 #  geom_point(data=centers, aes(x=V1,y=V2, color='Center'), size=50, alpha=.4, legend=FALSE)
+```
+```{r}
+library(ggplot2)
+library(pheatmap)
+df.hum <- data.frame(BirdBones.noNA$huml, BirdBones.noNA$humw)
+kmeans.hum <- kmeans((df.hum), 6)
+
+dm.len <- data.matrix(BirdBones.noNA[length])
+dm.dia <- data.matrix(BirdBones.noNA[diameter])
+
+pheatmap(dm.len, kmeans_k = 6)
+pheatmap(dm.dia, kmeans_k = 6)
+plot(kmeans.hum$cluster)
+plot(kmeans.hum$centers)
 ```
 
