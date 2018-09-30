@@ -4,16 +4,45 @@ author: "Jouke Profijt"
 date: "September 30, 2018"
 output: pdf_document
 ---
+```{r}
+#Copyright (c) 2018 Jouke Profijt.
+#Licensed under GPLv3. See LICENSE
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(pander)
 
 ```
-
-
-```{r}
+```{r include=FALSE}
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
+```
+
+### TLDR;Summary
+In my data cleaning i will be removing all samples with NA's becouse of the importance of these missing values. If the NA's were only in the smaller unimportant bones i would havee considered not removing them. I also took a look at the outliers which are the bigger birds, this data could be important but they are very diffrent from their respective means. I'm also not going to use bones with very little variation between them for classification, so the small bones, becouse: small variation makes for hard classification of bird groups.
+
+```{r echo=FALSE}
+NAs <- BirdBones[!complete.cases(BirdBones),]
+huml.3rd.q <- 90.31
+huml.1st.q <-25.17
+
+out <- huml.1st.q - 1.5*(huml.3rd.q - huml.1st.q)
+out.large <- huml.3rd.q + 1.5*(huml.3rd.q - huml.1st.q)
+outliers <- subset(BirdBones, huml > out.large | huml < out)
+summar <- as.table(c(nrow(NAs), nrow(outliers)))
+row.names(summar) <- c("NA's", "Outliers")
+pander(summar)
+```
+```{r}
+# Below is some summary data to genarate the above conclusion
+```
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+\newpage
+
+```{r echo=FALSE}
+
 pander(summary(BirdBones))
 ```
 
@@ -21,26 +50,21 @@ When we look at the summary we can see that every bone contains atleast 1 NA, An
 
 
 
-```{r}
+```{r echo=FALSE}
 # Table showing id's who are not complete.
 pander(BirdBones[!complete.cases(BirdBones),])
 ```
 
 we can see that there are no birds who only have NA's in the smaller bones so i suggest just not using the birds with NA's as shown above.
 
-```{r Outliers}
-huml.3rd.q <- 90.31
-huml.1st.q <-25.17
+```{r Outliers, echo=FALSE}
 
-out <- huml.1st.q - 1.5*(huml.3rd.q - huml.1st.q)
-out.large <- huml.3rd.q + 1.5*(huml.3rd.q - huml.1st.q)
-
-pander(subset(BirdBones, huml > out.large | huml < out))
+pander(outliers)
 ```
 
 As we can see most outliers come from the type Swimming Birds this could just mean that these birds are quite large but dont have a lot of samples to back it up.
 
-```{r}
+```{r echo=FALSE}
 a <- as.table(
 c(
 nrow(subset(BirdBones, type == "SW")),
@@ -49,7 +73,7 @@ nrow(subset(BirdBones, type == "W"))))
 row.names(a) <- c("Swimming Birds", "Wading Birds")
 pander(a, caption = "Sample count outliers")
 ```
-```{r}
+```{r echo=FALSE}
 means <- as.table(c(mean(subset(BirdBones, type == "SW")$huml),
                   mean(subset(BirdBones, type == "W")$huml)))
 
@@ -63,6 +87,5 @@ pander(means, caption = "Mean lenghts")
 
 ```
 
-
-Now we see that the wading birds outlier is a lot diffrent from its mean, while all swimming bird outliers are decently close and we must consider keeping those for clasification so we will remove the bird with id == 118, and we will remove all incomplete samples.
+As we can see here, all outliers are quite far from their respective means so that makes me consider that we should remove all outliers as they are in the groups with a lot of samples. 
 
