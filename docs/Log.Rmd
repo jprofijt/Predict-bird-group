@@ -3,11 +3,12 @@
 author: "Jouke Profijt"
 date: "September 11, 2018"
 output: pdf_document
+license: "GPLv3"
 
 ---
 ```{r}
 #Copyright (c) 2018 Jouke Profijt.
-#Licensed under GPLv3. See LICENCE
+#Licensed under GPLv3. See LICENSE
 ```
 
 
@@ -129,7 +130,7 @@ As you can see there are quite a few outliers in all groups except in group R, T
 
 What we can also see in these plots are which birds are most likely the largest, as seen above color cyan or SW or Swimming Birds are the biggest of them all closely followed by W or Wading Birds
 ```{r}
-ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
+ggplot(BirdBones.noNA,aes(x=length.mean,y=diameter.mean,color=type))+
   geom_point()+
   geom_smooth()+
   ggtitle("mean lenght vs mean diameter")+
@@ -216,4 +217,5 @@ pheatmap(dm.dia, kmeans_k = 6)
 plot(kmeans.hum$cluster)
 plot(kmeans.hum$centers)
 ```
+
 
