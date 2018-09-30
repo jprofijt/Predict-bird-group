@@ -1,0 +1,68 @@
+---
+title: "Quality Report"
+author: "Jouke Profijt"
+date: "September 30, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pander)
+
+```
+
+
+```{r}
+BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
+pander(summary(BirdBones))
+```
+
+When we look at the summary we can see that every bone contains atleast 1 NA, And from our EDA we concluded that we dont want to use the small bones Femur & Tibiotarsus for classifiacation. So if the a sample only contains NA's in those two bones we can still use those samples. \newpage
+
+
+
+```{r}
+# Table showing id's who are not complete.
+pander(BirdBones[!complete.cases(BirdBones),])
+```
+
+we can see that there are no birds who only have NA's in the smaller bones so i suggest just not using the birds with NA's as shown above.
+
+```{r Outliers}
+huml.3rd.q <- 90.31
+huml.1st.q <-25.17
+
+out <- huml.1st.q - 1.5*(huml.3rd.q - huml.1st.q)
+out.large <- huml.3rd.q + 1.5*(huml.3rd.q - huml.1st.q)
+
+pander(subset(BirdBones, huml > out.large | huml < out))
+```
+
+As we can see most outliers come from the type Swimming Birds this could just mean that these birds are quite large but dont have a lot of samples to back it up.
+
+```{r}
+a <- as.table(
+c(
+nrow(subset(BirdBones, type == "SW")),
+nrow(subset(BirdBones, type == "W"))))
+
+row.names(a) <- c("Swimming Birds", "Wading Birds")
+pander(a, caption = "Sample count outliers")
+```
+```{r}
+means <- as.table(c(mean(subset(BirdBones, type == "SW")$huml),
+                  mean(subset(BirdBones, type == "W")$huml)))
+
+
+
+
+
+row.names(means) <- c("Swimming Birds", "Wading Birds")
+pander(means, caption = "Mean lenghts")
+
+
+```
+
+
+Now we see that the wading birds outlier is a lot diffrent from its mean, while all swimming bird outliers are decently close and we must consider keeping those for clasification so we will remove the bird with id == 118, and we will remove all incomplete samples.
+
