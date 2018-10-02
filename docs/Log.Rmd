@@ -236,4 +236,70 @@ Birdbones.Clean <- BirdBones.noNA[! BirdBones.noNA$id %in% outliers$id, ]
 summary(Birdbones.Clean)
 ```
 
+```{r}
+long.bones <- c(1, 2,3, 4,5,8,9, 12)
+Birdbones.Clean <- Birdbones.Clean[,long.bones ]
+```
+```{r}
 
+write.csv(Birdbones.Clean, "../data/CleanData.csv")
+```
+
+After creating the csv file im going to use weka to create an arff, i know there is a write.arff function but i can't get that to install properly.
+\newpage
+
+# Weka Analysis
+
+Using ZeroR We get 30% guessed correctly. It looks for the values with the largest sample count which is SO and guesses that its most likely that any bird is that bird. Zero R : Zero Rules.
+
+ZeroR predicts class value: SO
+
+
+  * Correctly Classified Instances         124               30.6931 %
+
+  * Incorrectly Classified Instances       280               69.3069 %
+
+  * Kappa statistic                          0     
+
+  * Mean absolute error                      0.2616
+
+  * Root mean squared error                  0.3615
+
+  * Relative absolute error                100      %
+
+  * Root relative squared error            100      %
+
+  * Total Number of Instances              404   
+Using One R without any changes gives a model that is overfitted. what i would want from one R is 6 diffrent classifiers each for 1. With a default bucket size of 6 we get 15 diffrent classiefiers.
+
+with bucket size 12 we get 7 classiefiers, and 15 we get 3.
+
+One R with bucket size 11 seems to give us 6 diffrent classiefiers which is what i want. But the accuracy of the One R model is not very high. 
+
+One R Classiefier model with bucket size 11 
+
+huml: 
+
+	  < 29.71	-> SO 
+	  < 34.31	-> T  
+	  < 45.64	-> P  
+	  < 108.105	-> SW 
+	  < 126.94	-> R  
+	  >= 126.94	-> SW 
+	  
+Correctly Classified Instances         208               51.4851 %  
+Incorrectly Classified Instances       196               48.5149 %  
+Kappa statistic                          0.3662  
+Mean absolute error                      0.1617  
+Root mean squared error                  0.4021  
+Relative absolute error                 61.8272 % 
+Root relative squared error            111.2504 %  
+Total Number of Instances              404       
+
+With using Random.Forest i have done 3 diffrent runs. one with 10 max depht, 15 max depht and 20 max depht.
+
+Trees.Ra(Max 10) : 78.85%
+
+Trees(Max 15)    : 79.14%
+
+Trees(Max 20)    : 79.09%
