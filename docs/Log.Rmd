@@ -218,4 +218,22 @@ plot(kmeans.hum$cluster)
 plot(kmeans.hum$centers)
 ```
 
+For data cleaning we already have a dataset without NA's(BirdBones.NoNA). now we need to remove the found outliers and discard the unneeeded bones.
+
+```{r}
+huml.3rd.q <- 90.31
+huml.1st.q <-25.17
+
+out <- huml.1st.q - 1.5*(huml.3rd.q - huml.1st.q)
+out.large <- huml.3rd.q + 1.5*(huml.3rd.q - huml.1st.q)
+outliers <- subset(BirdBones.noNA, huml > out.large | huml < out)
+Birdbones.Clean <- BirdBones.noNA[! BirdBones.noNA$id %in% outliers$id, ]
+
+
+```
+
+```{r}
+summary(Birdbones.Clean)
+```
+
 
