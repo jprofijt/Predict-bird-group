@@ -248,7 +248,9 @@ write.csv(Birdbones.Clean, "../data/CleanData.csv")
 After creating the csv file im going to use weka to create an arff, i know there is a write.arff function but i can't get that to install properly.
 \newpage
 
-u# Weka Analysis
+# Weka Analysis
+
+For this classification we want the accuracy to be as high as possible, as wrongly classified fossils dont have that big of an impact as if someones health is on the line. 
 
 Using ZeroR We get 30% guessed correctly. It looks for the values with the largest sample count which is SO and guesses that its most likely that any bird is that bird. Zero R : Zero Rules.
 
@@ -320,11 +322,6 @@ Incorrectly Classified Instances       195               48.2673 %
 
 With using Random.Forest i have done 3 diffrent runs, Becouse this accuracy is already much higher than the one & zero R performance. one with 10 max depht, 15 max depht and 20 max depht.
 
-Trees.Ra(Max 10) : 78.85%
-
-Trees(Max 15)    : 79.14%
-
-Trees(Max 20)    : 79.09%
 
 
 Simple logistic also gives promising results with default settings:
@@ -419,3 +416,30 @@ Key:
 (8) lazy.IBk '-K 1 -W 0 -A \"weka.core.neighboursearch.LinearNNSearch -A \\\"weka.core.EuclideanDistance -R first-last\\\"\"' -3080186098777067172
 
 So from our experimentation with diffrent classification algorithems we conclude that Random.Forest and IBk ran the best of them all.
+
+
+### Random.Forest
+
+  First i have changed the max depth value and tested 10, 15, 20. in this testing using the experimenter i concluded that a max depth of 15 gives the best results.
+  
+Trees.Ra(Max 10) : 78.85%
+
+Trees(Max 15)    : 79.14%
+
+Trees(Max 20)    : 79.09%
+
+Changing other settings only gives worse results.
+
+### IBk, Nearest Neigbour
+
+  It seems that it doesn't really matter what settings are used for this algoreithem as it gives them all the same accuracy. and if accuracy is the only metric we really want to maximize we can use default settings.
+  \newpage
+  
+```{r}
+
+```
+
+![ROC class: SW Alg: Random.Forest](../WekaGraphs/SW-ROC-RandomForest.jpg)
+
+![ROC class: SW Alg: IBk](../WekaGraphs/SW-ROC-IBk.jpg)
+  
