@@ -1,0 +1,49 @@
+---
+title: "Predicting bird classifcation by bone lenghts"
+author: "Jouke Profijt"
+date: "October 8, 2018"
+output: pdf_document
+license: "GPLv3"
+
+---
+```{r}
+#Copyright (c) 2018 Jouke Profijt.
+#Licensed under GPLv3. See LICENSE
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Resutls
+```{r echo=FALSE}
+BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
+BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
+length <- c(2,4,6,8,10)
+library(ggplot2)
+
+ggplot(stack(BirdBones.noNA[length]), aes(x = ind, y = values, color = ind)) +
+  geom_boxplot()+
+  xlab("Bone Type")+
+  ylab("Length in mm")+
+  labs(title = "Boxplot for bone lenghts per bone in mm", 
+       subtitle = "Variation between small and large bones.",
+       caption = "Graph 1: Bone lengths")
+```
+The Femuer as we can see in Graph 1 is the one of the smallest bones in all bird groups, 2nd to the Taesometatarsus. Because these 2 bones are so small there is not a lot of variation measuarable between the diffrent bird groups and thus not that important for classification, that is why in this experiment there was chosen to leave these 2 bones out for classificaton.
+
+```{r, echo=FALSE}
+source("../scripts/BoneMeans.R")
+length.long <- c(2, 4, 8)
+diameter.long <- c(3, 5, 9)
+BirdBones.noNA.long <- BoneMeans(BirdBones.noNA, length.long, diameter.long)
+
+ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
+  geom_point()+
+  geom_smooth(method = loess)+
+  xlab("Mean Lenght in mm")+
+  ylab("Mean Diameter in mm")+
+  labs(title = "mean lenght vs mean diameter For Humerus, Ulna and Tibiotarsus", caption = "graph 2: lenght vs diameter"
+       )
+```
+graph 2 shows us that the total bone lenght for the Swimming Birds is quite a bit larger than the other birds. Also we can see that the Terrestrial birds have thicker bones than the rest of the birds but are stull quite small. the singing birds are overall very small ans should be easy to classify. The raptors and Wading birds are a bit average and could become diffcult to classify but the raptors are a bit thicker and the Wading birds are a bit smaller.
