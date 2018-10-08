@@ -428,6 +428,17 @@ Trees(Max 15)    : 79.14%
 
 Trees(Max 20)    : 79.09%
 
+=== Confusion Matrix ===
+
+   a   b   c   d   e   f   <-- classified as
+  87  11   0   4   0   6 |   a = SW
+  17  34   0   2   4   6 |   b = W
+   2   0  12   2   4   3 |   c = T
+   7   1   0  37   3   0 |   d = R
+   0   0   1   1  30   6 |   e = P
+   0   0   1   1   1 121 |   f = SO
+
+
 Changing other settings only gives worse results.
 
 ### IBk, Nearest Neigbour
@@ -435,11 +446,52 @@ Changing other settings only gives worse results.
   It seems that it doesn't really matter what settings are used for this algoreithem as it gives them all the same accuracy. and if accuracy is the only metric we really want to maximize we can use default settings.
   \newpage
   
-```{r}
-
-```
 
 ![ROC class: SW Alg: Random.Forest](../WekaGraphs/SW-ROC-RandomForest.jpg)
 
 ![ROC class: SW Alg: IBk](../WekaGraphs/SW-ROC-IBk.jpg)
   
+### Learning Curve
+
+To analyse the learning curve for these algorithems i am gradually removing more data and trying to classify the data with the algorithem. This can be done by using the weka experimenter, using *InstancesResultListener -O weka_experiment.arff* as a destination, *CrossValidationResultProducer* with *splitEvaluator: ClassifierSplitEvaluator* with classifier: *FilteredClassifier, filter: RemovePercentage* and classifier set to *random.forest maxdepth 15* or *IBk* 
+
+Results For Random.Forest
+
+Dataset                   (1) meta.Fil | (2) meta. (3) meta. (4) meta. (5) meta. (6) meta. (7) meta. (8) meta. (9) meta.
+------------------------------------------------------------------------------------------------------------------------
+CleanData                (100)   22.07 |   23.27     25.17     26.82 v   29.17 v   32.59 v   35.48 v   39.24 v   47.05 v
+------------------------------------------------------------------------------------------------------------------------
+                               (v/ /*) |   (0/1/0)   (0/1/0)   (1/0/0)   (1/0/0)   (1/0/0)   (1/0/0)   (1/0/0)   (1/0/0)
+                               
+Results For IBk
+
+Dataset                   (1) meta.Fil | (2) meta. (3) meta. (4) meta. (5) meta. (6) meta. (7) meta. (8) meta. (9) meta.
+------------------------------------------------------------------------------------------------------------------------
+CleanData                (100)   18.26 |   19.08     20.63     23.01 v   25.26 v   28.52 v   31.58 v   35.75 v   45.99 v
+------------------------------------------------------------------------------------------------------------------------
+                               (v/ /*) |   (0/1/0)   (0/1/0)   (1/0/0)   (1/0/0)   (1/0/0)   (1/0/0)   (1/0/0)   (1/0/0)
+
+```{r}
+RemovedPercentage <- c(10, 20, 30, 40, 50, 60, 70, 80, 90)
+Random.Forest <- c(22.07, 23.27, 25.17, 26.82, 29.17, 32.59, 35.48, 39.24, 47.05)
+IBk <- c(18.26, 19.08, 20.63, 23.01, 25.26, 28.52, 31.58, 35.75, 45.99)
+
+dataf <- data.frame(RemovedPercentage, Random.Forest, IBk)
+dataf
+```
+```{r}
+library(ggplot2)
+ggplot(dataf)+
+  geom_smooth(aes(x = RemovedPercentage, y = Random.Forest, color="Random.Forest"))+
+  geom_smooth(aes(x = RemovedPercentage, y = IBk, color="IBk"))+
+  ggtitle("Learning curve for Random.Forest && IBk")+
+  xlab("Percentage of removed data points")+
+  ylab("False Positive rate")
+```
+Becouse our learning data is not very large (404), it is not really easy to determine the minimum amount of data needed for classification and we can assume that 400 samples is nessesary.
+
+```{r}
+experimenter_data <- read.csv("../data/AlgorithemPreformance.csv", header = T, sep = ",")
+```
+
+From my analyses im going to choose Random.Forest as classifier algorithem. altough IBk gives a higher accuracy because we haven't normalised the data using nearest neighbour isn't reliable and thats why we shouldn't use it. 
