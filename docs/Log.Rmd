@@ -206,7 +206,7 @@ Same plot as above but colorcoded so we can see to which group the outliers belo
 ```{r}
 library(ggplot2)
 library(pheatmap)
-df.hum <- data.frame(BirdBones.noNA$huml, BirdBones.noNA$humw)
+df.hum <- data.frame(log2(BirdBones.noNA$huml), log2(BirdBones.noNA$humw))
 kmeans.hum <- kmeans((df.hum), 6)
 
 dm.len <- data.matrix(BirdBones.noNA[length])
@@ -261,29 +261,41 @@ ZeroR predicts class value: SO
 
   * Incorrectly Classified Instances       280               69.3069 %
 
-=== Confusion Matrix ===
+```{r}
+ conf.matrix <-
+   rbind(
+    c(0,0,0,0,0,108),
+    c(0,0,0,0,0,63),
+    c(0,0,0,0,0,23),
+    c(0,0,0,0,0,48),
+    c(0,0,0,0,0,38),
+    c(0,0,0,0,0,124))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
 
-   a   b   c   d   e   f   <-- classified as
-   0   0   0   0   0 108 |   a = SW
-   0   0   0   0   0  63 |   b = W
-   0   0   0   0   0  23 |   c = T
-   0   0   0   0   0  48 |   d = R
-   0   0   0   0   0  38 |   e = P
-   0   0   0   0   0 124 |   f = SO
-   
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+conf.matrix
+```
+
 Using One R without any changes gives a model that is overfitted. what i would want from one R is 6 diffrent classifiers each for 1. With a default bucket size of 6 we get 15 diffrent classiefiers.
 
 with bucket size 12 we get 7 classiefiers, and 15 we get 3.
 
-=== Confusion Matrix ===
+```{r}
+ conf.matrix <-
+   rbind(
+    c(70,10,0,14,8,6),
+    c(24,13,1,10,11,4),
+    c(1,7,5,2,5,3),
+    c(23,8,0,11,6,0),
+    c(0,5,4,1,14,14),
+    c(0,1,3,0,12,108))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
 
-   a   b   c   d   e   f   <-- classified as
-  70  10   0  14   8   6 |   a = SW
-  24  13   1  10  11   4 |   b = W
-   1   7   5   2   5   3 |   c = T
-  23   8   0  11   6   0 |   d = R
-   0   5   4   1  14  14 |   e = P
-   0   1   3   0  12 108 |   f = SO
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+conf.matrix
+```
 
 
 One R with bucket size 11 seems to give us 6 diffrent classiefiers which is what i want. But the accuracy of the One R model is not very high. 
@@ -298,20 +310,25 @@ huml:
 	  < 108.105	-> SW 
 	  < 126.94	-> R  
 	  >= 126.94	-> SW 
-	  
+
 Correctly Classified Instances         208               51.4851 %  
 Incorrectly Classified Instances       196               48.5149 %  
 
+```{r}
+ conf.matrix <-
+   rbind(
+    c(69,11,1,10,8,9),
+    c(35,2,4,4,10,8),
+    c(4,1,4,2,8,4),
+    c(29,5,1,6,6,1),
+    c(5,0,7,0,16,10),
+    c(2,0,3,0,10,109))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
 
-=== Confusion Matrix ===
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
 
-   a   b   c   d   e   f   <-- classified as
-  69  11   1  10   8   9 |   a = SW
-  35   2   4   4  10   8 |   b = W
-   4   1   4   2   8   4 |   c = T
-  29   5   1   6   6   1 |   d = R
-   5   0   7   0  16  10 |   e = P
-   2   0   3   0  10 109 |   f = SO
+conf.matrix
+```
 
 We get a lower accuracy but from the first run we were sure that the rule was overfitted
 
@@ -319,6 +336,32 @@ Next i tried Naive Bayes but it has almost the same result and not a lot of opti
 
 Correctly Classified Instances         209               51.7327 %
 Incorrectly Classified Instances       195               48.2673 %
+
+=== Confusion Matrix ===
+
+   a   b   c   d   e   f   <-- classified as
+  35  33   1  23   8   8 |   a = SW
+  10  20   1   8  11  13 |   b = W
+   2   4   0   1  15   1 |   c = T
+   7   7   0  25   8   1 |   d = R
+   0   4   0   0  18  16 |   e = P
+   0   1   0   0  12 111 |   f = SO
+   
+```{r}
+ conf.matrix <-
+   rbind(
+    c(35,33,1,23,8,8),
+    c(10,20,1,8,11,13),
+    c(2,4,0,1,15,1),
+    c(7,7,0,25,8,1),
+    c(0,4,0,0,18,16),
+    c(0,1,0,0,12,111))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+conf.matrix
+```
 
 With using Random.Forest i have done 3 diffrent runs, Becouse this accuracy is already much higher than the one & zero R performance. one with 10 max depht, 15 max depht and 20 max depht.
 
@@ -428,15 +471,21 @@ Trees(Max 15)    : 79.14%
 
 Trees(Max 20)    : 79.09%
 
-=== Confusion Matrix ===
+```{r}
+ conf.matrix <-
+   rbind(
+    c(87,11,0,4,0,6),
+    c(17,34,0,2,4,6),
+    c(2,0,12,2,4,3),
+    c(7,1,0,37,3,0),
+    c(0,0,1,1,30,6),
+    c(0,0,1,1,1,121))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
 
-   a   b   c   d   e   f   <-- classified as
-  87  11   0   4   0   6 |   a = SW
-  17  34   0   2   4   6 |   b = W
-   2   0  12   2   4   3 |   c = T
-   7   1   0  37   3   0 |   d = R
-   0   0   1   1  30   6 |   e = P
-   0   0   1   1   1 121 |   f = SO
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+conf.matrix
+```
 
 
 Changing other settings only gives worse results.
