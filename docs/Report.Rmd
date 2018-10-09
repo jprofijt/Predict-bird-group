@@ -14,8 +14,10 @@ license: "GPLv3"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+# 
 # Resutls
+
+## EDA
 ```{r echo=FALSE}
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
@@ -47,3 +49,106 @@ ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
        )
 ```
 graph 2 shows us that the total bone lenght for the Swimming Birds is quite a bit larger than the other birds. Also we can see that the Terrestrial birds have thicker bones than the rest of the birds but are stull quite small. the singing birds are overall very small ans should be easy to classify. The raptors and Wading birds are a bit average and could become diffcult to classify but the raptors are a bit thicker and the Wading birds are a bit smaller.
+
+```{r, echo=FALSE}
+library(ggplot2)
+
+ggplot(BirdBones.noNA.long, aes(x = type, y = length.mean, color = type)) +
+  geom_boxplot()+
+  coord_flip()+
+  ggtitle("Boxplot for each ecological group's mean bone lenght")+
+  ylab("Mean bone lenght in mm")+
+  xlab("ecological group")+
+  labs("Boxplot for each ecological group's mean bone lenght", subtitle = "For Humerus, Ulna and Tibiotarsus",caption = "graph 3: mean bone lenghts")
+```
+In graph 3 again we see the bigger birds seperated between their bonelenghts, and can quite easely distingguish each group. Altough their is some overlap between lenghts we can conlude that classification via lenght the birds bone lenght is probably the best way of classification.
+\newpage
+
+## Weka
+In weka the goal was to find a classification algorithem that has the highest possible accuracy because classifying a birds herritage it does not matter that much if there is a False positive, the goal was to keep false negatives low and keep true positives high.
+
+### Zero R
+```{r, echo=FALSE}
+library(pander)
+ conf.matrix <-
+   rbind(
+    c(0,0,0,0,0,108),
+    c(0,0,0,0,0,63),
+    c(0,0,0,0,0,23),
+    c(0,0,0,0,0,48),
+    c(0,0,0,0,0,38),
+    c(0,0,0,0,0,124))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+pander(conf.matrix, caption = "Zero R Confusion matrix")
+
+```
+
+```{r, echo=FALSE}
+accuracy <- rbind(c(124, 280), c("30.6931 %", "69.3069 %"))
+
+colnames(accuracy) <- c("Correct", "Incorrect")
+rownames(accuracy) <- c("Instances", "Percentage")
+pander(accuracy, caption = "Zero R classification results")
+```
+
+Zero R uses zero rules as the name suggests, becouse of this it chooses 1 group that is most likely to be classified as seen in table 1.
+
+### One R
+```{r, echo=FALSE}
+ conf.matrix <-
+   rbind(
+    c(69,11,1,10,8,9),
+    c(35,2,4,4,10,8),
+    c(4,1,4,2,8,4),
+    c(29,5,1,6,6,1),
+    c(5,0,7,0,16,10),
+    c(2,0,3,0,10,109))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+pander(conf.matrix, caption = "One R Confusion matrix")
+```
+```{r, echo=FALSE}
+accuracy <- rbind(c(208, 196), c("51.4851 %", "48.5149 %"))
+
+colnames(accuracy) <- c("Correct", "Incorrect")
+rownames(accuracy) <- c("Instances", "Percentage")
+pander(accuracy, caption = "One R classification results")
+```
+
+
+### Chosen classifier: Random.Forest
+
+```{r, echo=FALSE}
+ conf.matrix <-
+   rbind(
+    c(87,11,0,4,0,6),
+    c(17,34,0,2,4,6),
+    c(2,0,12,2,4,3),
+    c(7,1,0,37,3,0),
+    c(0,0,1,1,30,6),
+    c(0,0,1,1,1,121))
+colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+
+pander(conf.matrix, caption = "Random.Forest Confusion matrix as chosen classifier")
+```
+
+
+```{r, echo=FALSE}
+accuracy <- rbind(c(321, 83), c("79.4554 %", "20.5446 %"))
+
+colnames(accuracy) <- c("Correct", "Incorrect")
+rownames(accuracy) <- c("Instances", "Percentage")
+pander(accuracy, caption = "Random.Forest as chosen classifier")
+```
+
+	  
+
+
+
