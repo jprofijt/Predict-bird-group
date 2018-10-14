@@ -2,9 +2,11 @@
 title: "Predicting bird classifcation by bone lenghts"
 author: "Jouke Profijt"
 date: "October 8, 2018"
-output: pdf_document
-license: "GPLv3"
-
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+license: GPLv3
 ---
 ```{r}
 #Copyright (c) 2018 Jouke Profijt.
@@ -12,7 +14,7 @@ license: "GPLv3"
 ```
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 # 
 # Resutls
@@ -32,7 +34,7 @@ ggplot(stack(BirdBones.noNA[length]), aes(x = ind, y = values, color = ind)) +
        subtitle = "Variation between small and large bones.",
        caption = "Graph 1: Bone lengths")
 ```
-The Femuer as we can see in Graph 1 is the one of the smallest bones in all bird groups, 2nd to the Taesometatarsus. Because these 2 bones are so small there is not a lot of variation measuarable between the diffrent bird groups and thus not that important for classification, that is why in this experiment there was chosen to leave these 2 bones out for classificaton.
+The Femuer as we can see in Graph 1 is the one of the smallest bones in all bird groups, 2nd to the Taesometatarsus. Because these 2 bones are so small there is not a lot of variation measuarable between the diffrent bird groups and thus might not be that important for classification.
 
 ```{r, echo=FALSE}
 source("../scripts/BoneMeans.R")
@@ -50,25 +52,60 @@ ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
 ```
 graph 2 shows us that the total bone lenght for the Swimming Birds is quite a bit larger than the other birds. Also we can see that the Terrestrial birds have thicker bones than the rest of the birds but are stull quite small. the singing birds are overall very small ans should be easy to classify. The raptors and Wading birds are a bit average and could become diffcult to classify but the raptors are a bit thicker and the Wading birds are a bit smaller.
 
+
+## Data Cleaning
 ```{r, echo=FALSE}
 library(ggplot2)
+library(grid)
+library(gridExtra)
 
-ggplot(BirdBones.noNA.long, aes(x = type, y = length.mean, color = type)) +
+ p1 <- ggplot(BirdBones.noNA.long, aes(x = type, y = length.mean, color = type)) +
   geom_boxplot()+
-  coord_flip()+
   ggtitle("Boxplot for each ecological group's mean bone lenght")+
   ylab("Mean bone lenght in mm")+
   xlab("ecological group")+
-  labs("Boxplot for each ecological group's mean bone lenght", subtitle = "For Humerus, Ulna and Tibiotarsus",caption = "graph 3: mean bone lenghts")
+  labs("Boxplot for each ecological group's mean bone lenght", subtitle = "For Humerus, Ulna and Tibiotarsus",caption = "graph 3: mean bone lenghts")+
+   theme(legend.position="none")
+
+
+
+
+
+huml.3rd.q <- 90.31
+huml.1st.q <-25.17
+
+out <- huml.1st.q - 1.5*(huml.3rd.q - huml.1st.q)
+out.large <- huml.3rd.q + 1.5*(huml.3rd.q - huml.1st.q)
+outliers <- subset(BirdBones.noNA.long, huml > out.large | huml < out)
+Birdbones.Clean <- BirdBones.noNA.long[! BirdBones.noNA.long$id %in% outliers$id, ]
+
+
+
+p2 <- ggplot(Birdbones.Clean, aes(x = type, y = length.mean, color = type)) +
+  geom_boxplot()+
+  labs(
+    title = "Boxplot for each ecological group's mean bone lenght",
+    x = "ecological group",
+    y = "",
+    subtitle = "For Humerus, Ulna and Tibiotarsus",
+    caption = "graph 4: Cleaned data"
+  )+
+  theme(legend.position="none")
+
+
+
+grid.arrange(p1, p2, ncol = 2)
 ```
-In graph 3 again we see the bigger birds seperated between their bonelenghts, and can quite easely distingguish each group. Altough their is some overlap between lenghts we can conlude that classification via lenght the birds bone lenght is probably the best way of classification.
-\newpage
+For our cleaning of data we removed all rows with NA's which cost us 7 datapoints. After that we calculated the 1st and 3rd quartile outliers from the humurus which can be seen in graph 3 & 4, and removed 9 rows. 
+
+After all cleaning we left with 404 datapoints to use for Weka Analyses and classification.
+
 
 ## Weka
 In weka the goal was to find a classification algorithem that has the highest possible accuracy because classifying a birds herritage it does not matter that much if there is a False positive, the goal was to keep false negatives low and keep true positives high.
 
-### Zero R
-```{r, echo=FALSE}
+
+```{r, include=FALSE}
 library(pander)
  conf.matrix <-
    rbind(
@@ -86,7 +123,7 @@ pander(conf.matrix, caption = "Zero R Confusion matrix")
 
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 accuracy <- rbind(c(124, 280), c("30.6931 %", "69.3069 %"))
 
 colnames(accuracy) <- c("Correct", "Incorrect")
@@ -94,10 +131,8 @@ rownames(accuracy) <- c("Instances", "Percentage")
 pander(accuracy, caption = "Zero R classification results")
 ```
 
-Zero R uses zero rules as the name suggests, becouse of this it chooses 1 group that is most likely to be classified as seen in table 1.
 
-### One R
-```{r, echo=FALSE}
+```{r, include=FALSE}
  conf.matrix <-
    rbind(
     c(69,11,1,10,8,9),
@@ -112,7 +147,7 @@ row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
 
 pander(conf.matrix, caption = "One R Confusion matrix")
 ```
-```{r, echo=FALSE}
+```{r, include=FALSE}
 accuracy <- rbind(c(208, 196), c("51.4851 %", "48.5149 %"))
 
 colnames(accuracy) <- c("Correct", "Incorrect")
@@ -148,7 +183,36 @@ rownames(accuracy) <- c("Instances", "Percentage")
 pander(accuracy, caption = "Random.Forest as chosen classifier")
 ```
 
-	  
+
+```{r}
+humurus <- signif(84.6535 - 82.1782, 4)
+ulna <-  signif(84.6535 -83.1683, 4) 
+Femur <-  signif(84.6535 -80.4455, 4)
+Tibiotarsus <-  signif(84.6535 - 84.4059, 4) 
+Taesometatarsus <-  signif(84.6535-83.1683, 4)
+
+loss <- data.frame(Bone=c("humurus", "ulna", "Femur", "Tibiotarsus", "Taesometatarsus"), 
+                   Classify_loss=c(humurus, ulna, Femur, Tibiotarsus, Taesometatarsus))
+
+library(ggplot2)
+ggplot(data=loss, aes(x=Bone, y=Classify_loss)) +
+  geom_bar(stat="identity", fill = "blue")+
+  geom_text(aes(label=Classify_loss), vjust=1.6, color="white", size=3.5)+
+  theme_minimal()+
+  labs(x = "bone type",
+       y = "accuracy loss (%)",
+       title = "Classification loss if certain bones are removed",
+       subtitle = "For Random.forest",
+       caption = "graph 5: accuracy loss per bone"
+       )
+```
+in graph 5 we can see what the importance is from certain bones if we are talking about classification. the diffrences we can see are becouse of their importance for the functionallity of the bird groups.
 
 
+# Conclusion & discussion
+
+What is the most important bone for each ecological group their function? we can conclude that (At least for classification) the Femur is the most important as when we remove this from our classification algorithems the accuracy loss is great. we can see this in graph 5 where the loss per bone is displayed. 
+while researching the subject we made the assumption that the Femeur and Taesometatarsus were the least important for classification. Becouse of this the first classification algorithems were done only using the longer bones but further in reverted this desicion. The classification algorithem that was chosen however wasn't changed. In the future we should first collect some data about the importance for some bones before making such rational desisions.
+
+We do wan to think about removing some bones as when we have less data to be put in the more unknown fossils with missing bones could possibly be classified
 
