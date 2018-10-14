@@ -544,3 +544,69 @@ experimenter_data <- read.csv("../data/AlgorithemPreformance.csv", header = T, s
 ```
 
 From my analyses im going to choose Random.Forest as classifier algorithem. altough IBk gives a higher accuracy because we haven't normalised the data using nearest neighbour isn't reliable and thats why we shouldn't use it. 
+
+
+To give an answer to the research question we need to run a few more weka experiments with Random forest. We want to see what bone in the birds have te most inpact on classification accuracy.
+
+```{r}
+# New Clean dataset with all bones.
+Birdbones.Clean.All <- BirdBones.noNA[! BirdBones.noNA$id %in% outliers$id, ]
+
+write.csv(Birdbones.Clean.All, "../data/CleanDataAll.csv")
+```
+
+Base Results with all bones:
+
+Accuracy : 84.6535 %
+
+Removed humurus: huml & humw collums:
+
+Accuracy: 82.1782 % 
+
+Diffrence: `r 82.1782 - 84.6535` %
+
+Removed ulnal & ulnaw collums:
+
+Accuracy: 83.1683 %
+
+Diffrence: `r 83.1683 - 84.6535` %
+
+Removed feml & femw collums:
+
+Accuracy: 80.4455 %
+
+Diffrence: `r 80.4455 - 84.6535` %
+
+Removed tibl & tibw collums:
+
+Accuracy: 84.4059 %
+
+Diffrence: `r 84.4059 - 84.6535` %
+
+Removed tarl & tarw collums:
+
+Accuracy: 83.1683 %
+
+Diffrence: `r 83.1683 - 84.6535` %
+
+```{r}
+humurus <- signif(84.6535 - 82.1782, 4)
+ulna <-  signif(84.6535 -83.1683, 4) 
+Femur <-  signif(84.6535 -80.4455, 4)
+Tibiotarsus <-  signif(84.6535 - 84.4059, 4) 
+Taesometatarsus <-  signif(84.6535-83.1683, 4)
+
+loss <- data.frame(Bone=c("humurus", "ulna", "Femur", "Tibiotarsus", "Taesometatarsus"), 
+                   Classify_loss=c(humurus, ulna, Femur, Tibiotarsus, Taesometatarsus))
+
+library(ggplot2)
+ggplot(data=loss, aes(x=Bone, y=Classify_loss)) +
+  geom_bar(stat="identity", fill = "blue")+
+  geom_text(aes(label=Classify_loss), vjust=1.6, color="white", size=3.5)+
+  theme_minimal()+
+  labs(x = "bone type",
+       y = "accuracy loss (%)",
+       title = "Classification loss if certain bones are removed" 
+       )
+```
+above we see the diffrence it makes per bone what the classification accuracy is. The Femur seems to be the most important bone for the functioning in bird specicies.
