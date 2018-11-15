@@ -496,10 +496,22 @@ Changing other settings only gives worse results.
   \newpage
   
 
-![ROC class: SW Alg: Random.Forest](../WekaGraphs/SW-ROC-RandomForest.jpg)
+```{r}
+rocdataW <- read.csv("../data/RocWading.arff", header = F, comment.char = "@", na.strings = "?")
+rocdataWibk <- read.csv("../data/RocWadingIbk.arff", header = F, comment.char = "@", na.strings = "?")
 
-![ROC class: SW Alg: IBk](../WekaGraphs/SW-ROC-IBk.jpg)
-  
+library(ggplot2)
+ggplot()+
+  geom_line(aes(x = rocdataW$V6, y = rocdataW$V7, color="Random.Forest"))+
+  geom_line(aes(x = rocdataWibk$V6, y = rocdataWibk$V7, color="IBk"))+
+  labs(x = "Specificity",
+       y = "Sensitivity",
+       title = "ROC curve",
+       subtitle = "Based on algorithm preformance on Wading bird classification"
+       )
+```
+
+
 ### Learning Curve
 
 To analyse the learning curve for these algorithems i am gradually removing more data and trying to classify the data with the algorithem. This can be done by using the weka experimenter, using *InstancesResultListener -O weka_experiment.arff* as a destination, *CrossValidationResultProducer* with *splitEvaluator: ClassifierSplitEvaluator* with classifier: *FilteredClassifier, filter: RemovePercentage* and classifier set to *random.forest maxdepth 15* or *IBk* 
@@ -525,7 +537,9 @@ RemovedPercentage <- c(10, 20, 30, 40, 50, 60, 70, 80, 90)
 Random.Forest <- c(22.07, 23.27, 25.17, 26.82, 29.17, 32.59, 35.48, 39.24, 47.05)
 IBk <- c(18.26, 19.08, 20.63, 23.01, 25.26, 28.52, 31.58, 35.75, 45.99)
 
-dataf <- data.frame(RemovedPercentage, Random.Forest, IBk)
+# reversing data because of small mistake in my understanding of learning curves & how weka handles the data. if you enter data correctly rev() & dataf[seq(dim(dataf)[1],1),] should not be nessesary
+dataf <- data.frame(rev(RemovedPercentage), Random.Forest, IBk)
+dataf <- dataf[seq(dim(dataf)[1],1),]
 dataf
 ```
 ```{r}
@@ -534,7 +548,7 @@ ggplot(dataf)+
   geom_smooth(aes(x = RemovedPercentage, y = Random.Forest, color="Random.Forest"))+
   geom_smooth(aes(x = RemovedPercentage, y = IBk, color="IBk"))+
   ggtitle("Learning curve for Random.Forest && IBk")+
-  xlab("Percentage of removed data points")+
+  xlab("Percentage of data")+
   ylab("False Positive rate")
 ```
 Becouse our learning data is not very large (404), it is not really easy to determine the minimum amount of data needed for classification and we can assume that 400 samples is nessesary.
