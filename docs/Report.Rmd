@@ -8,7 +8,7 @@ output:
     df_print: paged
 license: GPLv3
 ---
-```{r}
+```{r echo=FALSE}
 #Copyright (c) 2018 Jouke Profijt.
 #Licensed under GPLv3. See LICENSE
 ```
@@ -16,10 +16,15 @@ license: GPLv3
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
-# 
-# Resutls
+# Classification of differing ecological bird populations
 
-## EDA
+## Introduction
+
+## Materials & Methods
+
+## Resutls
+
+### EDA
 ```{r echo=FALSE}
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
@@ -34,7 +39,7 @@ ggplot(stack(BirdBones.noNA[length]), aes(x = ind, y = values, color = ind)) +
        subtitle = "Variation between small and large bones.",
        caption = "Graph 1: Bone lengths")
 ```
-The Femuer as we can see in Graph 1 is the one of the smallest bones in all bird groups, 2nd to the Taesometatarsus. Because these 2 bones are so small there is not a lot of variation measuarable between the diffrent bird groups and thus might not be that important for classification.
+The Femuer as we can see in Graph 1 is the one of the smallest bones in all bird groups, 2nd to the Taesometatarsus. Because these 2 bones are so small there is not a lot of variation measuarable between the different bird groups and thus might not be that important for classification.
 
 ```{r, echo=FALSE}
 source("../scripts/BoneMeans.R")
@@ -42,12 +47,12 @@ length.long <- c(2, 4, 8)
 diameter.long <- c(3, 5, 9)
 BirdBones.noNA.long <- BoneMeans(BirdBones.noNA, length.long, diameter.long)
 
-ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
+ggplot(BirdBones.noNA.long,aes(x=log2(length.mean),y=log2(diameter.mean),color=type))+
   geom_point()+
   geom_smooth(method = loess)+
-  xlab("Mean Lenght in mm")+
-  ylab("Mean Diameter in mm")+
-  labs(title = "mean lenght vs mean diameter For Humerus, Ulna and Tibiotarsus", caption = "graph 2: lenght vs diameter"
+  xlab("Log2 Mean Lenght")+
+  ylab("Log2 Mean Diameter")+
+  labs(title = "Log2 transformed mean lenght vs mean diameter", subtitle="For Humerus, Ulna and Tibiotarsus", caption = "graph 2: lenght vs diameter"
        )
 ```
 graph 2 shows us that the total bone lenght for the Swimming Birds is quite a bit larger than the other birds. Also we can see that the Terrestrial birds have thicker bones than the rest of the birds but are stull quite small. the singing birds are overall very small ans should be easy to classify. The raptors and Wading birds are a bit average and could become diffcult to classify but the raptors are a bit thicker and the Wading birds are a bit smaller.
@@ -209,10 +214,13 @@ ggplot(data=loss, aes(x=Bone, y=Classify_loss)) +
 in graph 5 we can see what the importance is from certain bones if we are talking about classification. the diffrences we can see are becouse of their importance for the functionallity of the bird groups.
 
 
-# Conclusion & discussion
+## Conclusion & discussion
 
 What is the most important bone for each ecological group their function? we can conclude that (At least for classification) the Femur is the most important as when we remove this from our classification algorithems the accuracy loss is great. we can see this in graph 5 where the loss per bone is displayed. 
 while researching the subject we made the assumption that the Femeur and Taesometatarsus were the least important for classification. Becouse of this the first classification algorithems were done only using the longer bones but further in reverted this desicion. The classification algorithem that was chosen however wasn't changed. In the future we should first collect some data about the importance for some bones before making such rational desisions.
 
 We do wan to think about removing some bones as when we have less data to be put in the more unknown fossils with missing bones could possibly be classified
 
+## Minor Proposal
+
+## References
