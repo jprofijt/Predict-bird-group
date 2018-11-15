@@ -24,6 +24,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Resutls
 
+
 ### EDA
 ```{r echo=FALSE}
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
@@ -39,7 +40,9 @@ ggplot(stack(BirdBones.noNA[length]), aes(x = ind, y = values, color = ind)) +
        subtitle = "Variation between small and large bones.",
        caption = "Graph 1: Bone lengths")
 ```
-The Femuer as we can see in Graph 1 is the one of the smallest bones in all bird groups, 2nd to the Taesometatarsus. Because these 2 bones are so small there is not a lot of variation measuarable between the different bird groups and thus might not be that important for classification.
+Graph 1 shows the average lenght per bone for all ecological groups. As we can see there are 2 bone types which are quite a bit smaller than the other 3 bones. The Femuer(green) is the smallest of these 2, this stands out because in us humans this is our biggest bone. after the Femeur the next smallest bone is the Taesometatarsus, this is expected as this bone connects the feet of the birds to their legs.
+
+These 2 bones are quite small and show less variation than the other 3 bones. As we are trying to classify these bones they might be less important in our final classification algorithm. 
 
 ```{r, echo=FALSE}
 source("../scripts/BoneMeans.R")
@@ -55,6 +58,8 @@ ggplot(BirdBones.noNA.long,aes(x=log2(length.mean),y=log2(diameter.mean),color=t
   labs(title = "Log2 transformed mean lenght vs mean diameter", subtitle="For Humerus, Ulna and Tibiotarsus", caption = "graph 2: lenght vs diameter"
        )
 ```
+
+
 graph 2 shows us that the total bone lenght for the Swimming Birds is quite a bit larger than the other birds. Also we can see that the Terrestrial birds have thicker bones than the rest of the birds but are stull quite small. the singing birds are overall very small ans should be easy to classify. The raptors and Wading birds are a bit average and could become diffcult to classify but the raptors are a bit thicker and the Wading birds are a bit smaller.
 
 
@@ -213,6 +218,41 @@ ggplot(data=loss, aes(x=Bone, y=Classify_loss)) +
 ```
 in graph 5 we can see what the importance is from certain bones if we are talking about classification. the diffrences we can see are becouse of their importance for the functionallity of the bird groups.
 
+```{r}
+RemovedPercentage <- c(10, 20, 30, 40, 50, 60, 70, 80, 90)
+Random.Forest <- c(22.07, 23.27, 25.17, 26.82, 29.17, 32.59, 35.48, 39.24, 47.05)
+IBk <- c(18.26, 19.08, 20.63, 23.01, 25.26, 28.52, 31.58, 35.75, 45.99)
+
+dataf <- data.frame(rev(RemovedPercentage), Random.Forest, IBk)
+dataf <- dataf[seq(dim(dataf)[1],1),]
+
+library(ggplot2)
+ggplot(dataf)+
+  geom_smooth(aes(x = RemovedPercentage, y = Random.Forest, color="Random.Forest"))+
+  geom_smooth(aes(x = RemovedPercentage, y = IBk, color="IBk"))+
+  labs(x = "Percentage of data",
+       y = "False Positive rate",
+       title = "Learning curve",
+       subtitle = "For Random.Forest && IBk",
+       caption = "graph 6: Learning curve inspected algorithm's"
+       )
+  
+```
+
+```{r}
+rocdataW <- read.csv("../data/RocWading.arff", header = F, comment.char = "@", na.strings = "?")
+rocdataWibk <- read.csv("../data/RocWadingIbk.arff", header = F, comment.char = "@", na.strings = "?")
+
+library(ggplot2)
+ggplot()+
+  geom_line(aes(x = rocdataW$V6, y = rocdataW$V7, color="Random.Forest"))+
+  geom_line(aes(x = rocdataWibk$V6, y = rocdataWibk$V7, color="IBk"))+
+  labs(x = "Specificity",
+       y = "Sensitivity",
+       title = "ROC curve",
+       subtitle = "Based on algorithm preformance on Wading bird classification"
+       )
+```
 
 ## Conclusion & discussion
 
