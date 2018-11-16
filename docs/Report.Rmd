@@ -54,15 +54,17 @@ Every algorithm their initial output is a confusion matrix. This matrix is the m
 * A Learning curve shows the false positive rate over how much data is provided to the learning algorithm
 * A ROC curve shows the Sensitivity over the Specificity.
 
-
+\newpage
 
     
   
 
 ## Resutls
 
+To begin researching what classification algorithm is the best for our data we first need to explore the data. we want to know what the distribution of data is, if we need to remove datapoints because they are missing or misleading, so removing NA's & outliers. To find out what algorithms to use we can compare their performance by looking at accuracym ROC and their learning curve.
 
-### EDA
+
+### Exploratory Data Analysis
 ```{r echo=FALSE}
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
@@ -124,11 +126,13 @@ p3 <- grid.arrange(arrangeGrob(p1 + theme(legend.position="none"),
 
 ```
 
-Graph 1 & 2 show the bone length distribution. Graph 1 is the distribution without any changes. Here we see that the Swimming birds have quite large bones, which could be because of abnormally big bird samples. as you look closer at the swimming birds in graph 1 and 2 we see that there might be a lot of noise in these samples because there are a lot of points outside the main distribution. For the other groups we also see that the Scansorial Birds & the Sininging birds are the smaller groups. 
+Graph 1 & 2 show the bone length & diameter distribution. As expected the lenght and diameter are strongly correlated (longer bones alse need to be thicker to keep their strenght). 
+
+Graph 1 is the distribution without any changes. Here we see that the Swimming birds have quite large bones, which could be because of abnormally big bird samples. as you look closer at the swimming birds in graph 1 and 2 we see that there might be a lot of noise in these samples because there are a lot of points outside the main distribution. For the other groups we also see that the Scansorial Birds & the Sininging birds are the smaller groups. 
 
 Terrestrial Birds, Raptors and Wading Birds seem to be in the middle of the rest with the Terrestrial Birds having notisable thicker bones that the others.
 
-## Data Cleaning
+### Data Cleaning
 ```{r, echo=FALSE}
 library(ggplot2)
 library(grid)
@@ -171,13 +175,53 @@ p2 <- ggplot(Birdbones.Clean, aes(x = type, y = length.mean, color = type)) +
 
 grid.arrange(p1, p2, ncol = 2)
 ```
-For our cleaning of data we removed all rows with NA's which cost us 7 datapoints. After that we calculated the 1st and 3rd quartile outliers from the humurus which can be seen in graph 3 & 4, and removed 9 rows. 
+For our cleaning of data we removed all rows with NA's which cost us 7 datapoints. After that we calculated the 1st and 3rd quartile outliers from the humurus which can be seen in graph 3 & 4, and removed 9 rows.
+
+
+
+* 1st quartile(Q1): 25.17 mm
+* 3rd quartile(Q3): 90.31 mm
+
+$Small threshold = Q1 - 1.5 * (Q3 - Q1)$
+
+$Large threshold = Q3 + 1.5 * (Q3 - Q1)$
+
+```{r}
+library(pander)
+NAs <- BirdBones[!complete.cases(BirdBones),]
+huml.3rd.q <- 90.31
+huml.1st.q <-25.17
+
+out <- huml.1st.q - 1.5*(huml.3rd.q - huml.1st.q)
+out.large <- huml.3rd.q + 1.5*(huml.3rd.q - huml.1st.q)
+outliers <- subset(BirdBones, huml > out.large | huml < out)
+summar <- as.table(c(nrow(NAs), nrow(outliers)))
+row.names(summar) <- c("NA's", "Outliers")
+pander(summar, caption = "Removed datapoints")
+```
+
 
 After all cleaning we left with 404 datapoints to use for Weka Analyses and classification.
+\newpage
+
+### Weka (classification)
+In weka the goal was to find a classification algorithm that has the highest possible accuracy because classifying a birds herritage it does not matter that much if there is a False positive, the goal was to keep false negatives low and keep true positives high.
 
 
-## Weka
-In weka the goal was to find a classification algorithem that has the highest possible accuracy because classifying a birds herritage it does not matter that much if there is a False positive, the goal was to keep false negatives low and keep true positives high.
+
+```{r, echo=FALSE}
+accuracy <- rbind(c(342, 62 ), c("84.6535 %", "15.3465 %"))
+
+colnames(accuracy) <- c("Correct", "Incorrect")
+rownames(accuracy) <- c("Instances", "Percentage")
+pander(accuracy, caption = "Random.Forest performance")
+
+accuracy <- rbind(c(371, 33 ), c("91.8317 %", "8.1683 %"))
+
+colnames(accuracy) <- c("Correct", "Incorrect")
+rownames(accuracy) <- c("Instances", "Percentage")
+pander(accuracy, caption = "Ibk performance")
+```
 
 ```{r}
 rocdataW <- read.csv("../data/RocWading.arff", header = F, comment.char = "@", na.strings = "?")
@@ -187,13 +231,15 @@ library(ggplot2)
 ggplot()+
   geom_line(aes(x = rocdataW$V6, y = rocdataW$V7, color="Random.Forest"))+
   geom_line(aes(x = rocdataWibk$V6, y = rocdataWibk$V7, color="IBk"))+
-  labs(x = "Specificity",
-       y = "Sensitivity",
+  labs(x = "False Positive Rate(Specificity)",
+       y = "True Positive Rate(Sensitivity)",
        title = "ROC curve",
        subtitle = "Based on algorithm preformance on Wading bird classification",
-       caption = "Graph 6: ROC"
+       caption = "Graph 5: ROC"
        )
 ```
+
+In graph 5 we can see the ROC comparison between IBk and Random.Forest. As the two algorithm's come closer to the upper left we see that Ibk cuts off quit a bit earlier than Random.Forest. this could give an indication that Random.forest might have a higher overall accuracy. But in the IBk algorithm we got fewer datapoint to work with.
 
 ```{r}
 RemovedPercentage <- c(10, 20, 30, 40, 50, 60, 70, 80, 90)
@@ -205,95 +251,21 @@ dataf <- dataf[seq(dim(dataf)[1],1),]
 
 library(ggplot2)
 ggplot(dataf)+
-  geom_smooth(aes(x = RemovedPercentage, y = Random.Forest, color="Random.Forest"))+
-  geom_smooth(aes(x = RemovedPercentage, y = IBk, color="IBk"))+
+  geom_smooth(aes(x = RemovedPercentage, y = Random.Forest, color="Random.Forest"), method = loess)+
+  geom_smooth(aes(x = RemovedPercentage, y = IBk, color="IBk"), method = loess)+
   labs(x = "Percentage of data",
        y = "False Positive rate",
        title = "Learning curve",
        subtitle = "For Random.Forest && IBk",
-       caption = "graph 7: Learning curve inspected algorithm's"
+       caption = "graph 6: Learning curve inspected algorithm's"
        )
   
 ```
 
+Graph 6 shows the learning curve for both algorithms. As we reduce the amount of data fed to the learning algorithms we can see that both lose about the same amount of accuracy. But as shown in table 2 & 3 the overall accuracy of ibk is about 8% better and that is shown here again.
 
-```{r, include=FALSE}
-library(pander)
- conf.matrix <-
-   rbind(
-    c(0,0,0,0,0,108),
-    c(0,0,0,0,0,63),
-    c(0,0,0,0,0,23),
-    c(0,0,0,0,0,48),
-    c(0,0,0,0,0,38),
-    c(0,0,0,0,0,124))
-colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
+Ibk is also a small amount better in classification when less data is provided.
 
-row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
-
-pander(conf.matrix, caption = "Zero R Confusion matrix")
-
-```
-
-```{r, include=FALSE}
-accuracy <- rbind(c(124, 280), c("30.6931 %", "69.3069 %"))
-
-colnames(accuracy) <- c("Correct", "Incorrect")
-rownames(accuracy) <- c("Instances", "Percentage")
-pander(accuracy, caption = "Zero R classification results")
-```
-
-
-```{r, include=FALSE}
- conf.matrix <-
-   rbind(
-    c(69,11,1,10,8,9),
-    c(35,2,4,4,10,8),
-    c(4,1,4,2,8,4),
-    c(29,5,1,6,6,1),
-    c(5,0,7,0,16,10),
-    c(2,0,3,0,10,109))
-colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
-
-row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
-
-pander(conf.matrix, caption = "One R Confusion matrix")
-```
-```{r, include=FALSE}
-accuracy <- rbind(c(208, 196), c("51.4851 %", "48.5149 %"))
-
-colnames(accuracy) <- c("Correct", "Incorrect")
-rownames(accuracy) <- c("Instances", "Percentage")
-pander(accuracy, caption = "One R classification results")
-```
-
-
-### Chosen classifier: Random.Forest
-
-```{r, echo=FALSE}
- conf.matrix <-
-   rbind(
-    c(87,11,0,4,0,6),
-    c(17,34,0,2,4,6),
-    c(2,0,12,2,4,3),
-    c(7,1,0,37,3,0),
-    c(0,0,1,1,30,6),
-    c(0,0,1,1,1,121))
-colnames(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
-
-row.names(conf.matrix) <- c("SW", "W", "T", "R", "P", "SO")
-
-pander(conf.matrix, caption = "Random.Forest Confusion matrix as chosen classifier")
-```
-
-
-```{r, echo=FALSE}
-accuracy <- rbind(c(321, 83), c("79.4554 %", "20.5446 %"))
-
-colnames(accuracy) <- c("Correct", "Incorrect")
-rownames(accuracy) <- c("Instances", "Percentage")
-pander(accuracy, caption = "Random.Forest as chosen classifier")
-```
 
 
 ```{r}
@@ -315,11 +287,12 @@ ggplot(data=loss, aes(x=Bone, y=Classify_loss)) +
        y = "accuracy loss (%)",
        title = "Classification loss if certain bones are removed",
        subtitle = "For Random.forest",
-       caption = "graph 5: accuracy loss per bone"
+       caption = "graph 7: accuracy loss per bone"
        )
 ```
-in graph 5 we can see what the importance is from certain bones if we are talking about classification. the diffrences we can see are becouse of their importance for the functionallity of the bird groups.
+in graph 7 we can see what the importance is from certain bones if we are talking about classification. the differences we can see are because of their importance for the functionallity of the bird groups.
 
+\newpage
 
 
 
