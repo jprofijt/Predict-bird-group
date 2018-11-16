@@ -42,14 +42,19 @@ During this research we used data from an external source, used weka 3.8.0 for c
 
 ### Data
 
+[2]
+
 [Birds' Bones and Living Habits, Kaggle dataset](https://www.kaggle.com/zhangjuefei/birds-bones-and-living-habits)
     
   Bone measurements were measured from a skeleton collection of
   Natural History Museum of Los Angeles County, 
   provided by Dr. D. Liu of beijing Museaum of Natural History
+  
 
   
 ### R and Rstudio
+[1]R is a programming language used mostly in statistics and data analysis. developed by Ross Ihaka en Robert Gentleman.
+
 R was used for the exploration of the data, cleaning of the data and statistical analysis. 
 In our EDA(Exploratory Data Analysis) we looked at the structure of the data and the distribution of hte data using basic graphs with the ggplot2 library. 
 
@@ -59,7 +64,7 @@ And lastly we compared different classification algorithms again using plots fro
   
 ### weka 3.8.0
 
-Weka (Waikato Environment for Knowledge Analysis) is a free to use datamining software written in Java. It is an java application that is capable of doing lots of things apliccable to datamining. We will be using it to determine what is the best classification algorithm for our usecase. As we will be creating a java application of our own that can be used to classify the different bird groups. 
+Weka[3] (Waikato Environment for Knowledge Analysis) is a free to use datamining software written in Java. It is an java application that is capable of doing lots of things apliccable to datamining. We will be using it to determine what is the best classification algorithm for our usecase. As we will be creating a java application of our own that can be used to classify the different bird groups. 
 
 * First we use the explorer to make our datafiles usable in weka by removing duplicate id collums
 * when the data is ready we can use the classify module in weka to test diffrent classification algorithm's that have reasonable accuracy's.
@@ -344,9 +349,20 @@ For the algorithm to use we chose Random.Forest. Altough IBk gives better result
 
 If we were to redo this classification experiment we would strongly recommend normalizing the data, because as said in our conclusion the data is skewed towards the Sininging and Swimming Birds. use a method that equalizes the amount of datapoints per ecological group so that there is no more data for one type than the oters.
 
-Further we only removed outliers based on the Humerus. it might be worth looking at all available bones for results that differ too much. Also debate on removing datapoints with NA values as it might still be possible to classifiy if only one bone is missing as demonstrated in graph 7. If there is too much missing then yes, remove that instance but only one micht not be that important.
+Further we only removed outliers based on the Humerus. it might be worth looking at all available bones for results that differ too much. Also debate on removing datapoints with NA values as it might still be possible to classifiy if only one bone is missing as demonstrated in graph 7. If there is too much missing then yes, remove that instance but only one might not be that important.
 
 \newpage
 ## Minor Proposal
+In the minor Application design (which i chose) we will be focussing on creating userfriendly software. For this project i created a java application/wrapper that can classifiy bird bone data to a specific ecological group. If we want archeologists or biologists to use our application we need to make it userfriendly, As they might have no understanding of the commandline. 
+
+We could make an GUI application that lets you enter bone lenghts & diameters that you found in the field, Or select a file you have created. Selecting a file could be a problem because atleast in the current stat can only accept one type of file (arff) so we would need to create some sort of convertor or implement other filetypes.
+
+A web application could also be possible this would almost be the same as the GUI but here we could implement a database system where found data could be saved into an database for others to use or create new datasets.
 
 ## References
+1. Dalgaard, Peter - 2002 - Introductory Statistics with R - ISBN 0387954759.
+2. user [zhangjuefei](https://www.kaggle.com/zhangjuefei), kaggle - 2016 - Birds' Bones and Living Habits - [dataset](https://www.kaggle.com/zhangjuefei/birds-bones-and-living-habits/home)
+3.  Ian H. Witten, Eibe Frank, Len Trigg, Mark Hall, Geoffrey Holmes en Sally Jo Cunningham - 1999 - [pdf](https://www.cs.waikato.ac.nz/~ml/publications/1999/99IHW-EF-LT-MH-GH-SJC-Tools-Java.pdf)
+4. Jouke Profijt - 2018 - Research project - [(link)github-research](https://github.com/jprofijt/Predict-bird-group)
+5. Jouke Profijt - 2018 - java application - [(link)github-javaApplicaton](https://github.com/jprofijt/Predict-bird-group-java)
+ 
