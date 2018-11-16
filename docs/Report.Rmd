@@ -31,23 +31,15 @@ During this research we used data from an external source, used weka 3.8.0 for c
   Bone measurements were measured from a skeleton collection of
   Natural History Museum of Los Angeles County, 
   provided by Dr. D. Liu of beijing Museaum of Natural History
+
   
-  The birds are separated in 6 diffrent groups:
+### R and Rstudio
+R was used for the exploration of the data, cleaning of the data and statistical analysis. 
+In our EDA(Exploratory Data Analysis) we looked at the structure of the data and the distribution of hte data using basic graphs with the ggplot2 library. 
 
-  * Swimming Birds, SW 
-  * Wading Birds, W 
-  * Terrestrial Birds, T 
-  * Raptors, R 
-  * Scansorial Birds, P 
-  * Singing Birds, SO 
+Cleaning was done based on missing values which we all removed & on outliers which we also removed,
 
-Most samples have data for:
-
-  * Length and Diameter of the Humerus
-  * Length and Diameter of the Ulna
-  * Length and Diameter of the Femur
-  * Length and Diameter of the Tibiotarsus
-  * Length and Diameter of the Taesometatarsus
+And lastly we compared different classification algorithms again using plots from ggplot2 to choose the correct algorithm.
   
 ### weka 3.8.0
 
@@ -57,7 +49,12 @@ Weka (Waikato Environment for Knowledge Analysis) is a free to use datamining so
 * when the data is ready we can use the classify module in weka to test diffrent classification algorithm's that have reasonable accuracy's.
 * at last when we found some interesting algorithm's we can use the experimenter to try diffrent settings to find optimal ones.
 
-### R and Rstudio
+Every algorithm their initial output is a confusion matrix. This matrix is the measurement that we use to compare different algorithms. they are also inspected using a learning & ROC curve's.
+
+* A Learning curve shows the false positive rate over how much data is provided to the learning algorithm
+* A ROC curve shows the Sensitivity over the Specificity.
+
+
 
     
   
@@ -70,38 +67,66 @@ Weka (Waikato Environment for Knowledge Analysis) is a free to use datamining so
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
 length <- c(2,4,6,8,10)
-library(ggplot2)
-
-ggplot(stack(BirdBones.noNA[length]), aes(x = ind, y = values, color = ind)) +
-  geom_boxplot()+
-  xlab("Bone Type")+
-  ylab("Length in mm")+
-  labs(title = "Boxplot for bone lenghts per bone in mm", 
-       subtitle = "Variation between small and large bones.",
-       caption = "Graph 1: Bone lengths")
+# library(ggplot2)
+# 
+# ggplot(stack(BirdBones.noNA[length]), aes(x = ind, y = values, color = ind)) +
+#   geom_boxplot()+
+#   xlab("Bone Type")+
+#   ylab("Length in mm")+
+#   labs(title = "Boxplot for bone lenghts per bone in mm", 
+#        subtitle = "Variation between small and large bones.",
+#        caption = "Graph 1: Bone lengths")
 ```
-Graph 1 shows the average lenght per bone for all ecological groups. As we can see there are 2 bone types which are quite a bit smaller than the other 3 bones. The Femuer(green) is the smallest of these 2, this stands out because in us humans this is our biggest bone. after the Femeur the next smallest bone is the Taesometatarsus, this is expected as this bone connects the feet of the birds to their legs.
+<!-- Graph 1 shows the average lenght per bone for all ecological groups. As we can see there are 2 bone types which are quite a bit smaller than the other 3 bones. The Femuer(green) is the smallest of these 2, this stands out because in us humans this is our biggest bone. after the Femeur the next smallest bone is the Taesometatarsus, this is expected as this bone connects the feet of the birds to their legs. -->
 
-These 2 bones are quite small and show less variation than the other 3 bones. As we are trying to classify these bones they might be less important in our final classification algorithm. 
+<!-- These 2 bones are quite small and show less variation than the other 3 bones. As we are trying to classify these bones they might be less important in our final classification algorithm.  -->
 
 ```{r, echo=FALSE}
+library(ggplot2)
+library(grid)
+library(gridExtra)
 source("../scripts/BoneMeans.R")
 length.long <- c(2, 4, 8)
 diameter.long <- c(3, 5, 9)
 BirdBones.noNA.long <- BoneMeans(BirdBones.noNA, length.long, diameter.long)
 
-ggplot(BirdBones.noNA.long,aes(x=log2(length.mean),y=log2(diameter.mean),color=type))+
+p1<- ggplot(BirdBones.noNA.long,aes(x=length.mean,y=diameter.mean,color=type))+
+  geom_point()+
+  geom_smooth(method = loess)+
+  xlab("Mean Lenght in mm")+
+  ylab("Mean Diameter in mm")+
+  labs(title = "lenght vs mean diameter", caption = "graph 1: lenght vs diameter"
+       )+
+  theme(legend.position="bottom")
+
+p2 <- ggplot(BirdBones.noNA.long,aes(x=log2(length.mean),y=log2(diameter.mean),color=type))+
   geom_point()+
   geom_smooth(method = loess)+
   xlab("Log2 Mean Lenght")+
   ylab("Log2 Mean Diameter")+
-  labs(title = "Log2 transformed mean lenght vs mean diameter", subtitle="For Humerus, Ulna and Tibiotarsus", caption = "graph 2: lenght vs diameter"
+  labs(title = "Log2 transformed", caption = "graph 2: Log2 lenght vs diameter"
        )
+
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
+
+mylegend <-g_legend(p1)
+
+
+p3 <- grid.arrange(arrangeGrob(p1 + theme(legend.position="none"),
+                         p2 + theme(legend.position="none"),
+                         nrow=1),
+             mylegend, nrow=2,heights=c(10, 1))
+
+
 ```
 
+Graph 1 & 2 show the bone length distribution. Graph 1 is the distribution without any changes. Here we see that the Swimming birds have quite large bones, which could be because of abnormally big bird samples. as you look closer at the swimming birds in graph 1 and 2 we see that there might be a lot of noise in these samples because there are a lot of points outside the main distribution. For the other groups we also see that the Scansorial Birds & the Sininging birds are the smaller groups. 
 
-graph 2 shows us that the total bone lenght for the Swimming Birds is quite a bit larger than the other birds. Also we can see that the Terrestrial birds have thicker bones than the rest of the birds but are stull quite small. the singing birds are overall very small ans should be easy to classify. The raptors and Wading birds are a bit average and could become diffcult to classify but the raptors are a bit thicker and the Wading birds are a bit smaller.
-
+Terrestrial Birds, Raptors and Wading Birds seem to be in the middle of the rest with the Terrestrial Birds having notisable thicker bones that the others.
 
 ## Data Cleaning
 ```{r, echo=FALSE}
@@ -153,6 +178,43 @@ After all cleaning we left with 404 datapoints to use for Weka Analyses and clas
 
 ## Weka
 In weka the goal was to find a classification algorithem that has the highest possible accuracy because classifying a birds herritage it does not matter that much if there is a False positive, the goal was to keep false negatives low and keep true positives high.
+
+```{r}
+rocdataW <- read.csv("../data/RocWading.arff", header = F, comment.char = "@", na.strings = "?")
+rocdataWibk <- read.csv("../data/RocWadingIbk.arff", header = F, comment.char = "@", na.strings = "?")
+
+library(ggplot2)
+ggplot()+
+  geom_line(aes(x = rocdataW$V6, y = rocdataW$V7, color="Random.Forest"))+
+  geom_line(aes(x = rocdataWibk$V6, y = rocdataWibk$V7, color="IBk"))+
+  labs(x = "Specificity",
+       y = "Sensitivity",
+       title = "ROC curve",
+       subtitle = "Based on algorithm preformance on Wading bird classification",
+       caption = "Graph 6: ROC"
+       )
+```
+
+```{r}
+RemovedPercentage <- c(10, 20, 30, 40, 50, 60, 70, 80, 90)
+Random.Forest <- c(22.07, 23.27, 25.17, 26.82, 29.17, 32.59, 35.48, 39.24, 47.05)
+IBk <- c(18.26, 19.08, 20.63, 23.01, 25.26, 28.52, 31.58, 35.75, 45.99)
+
+dataf <- data.frame(rev(RemovedPercentage), Random.Forest, IBk)
+dataf <- dataf[seq(dim(dataf)[1],1),]
+
+library(ggplot2)
+ggplot(dataf)+
+  geom_smooth(aes(x = RemovedPercentage, y = Random.Forest, color="Random.Forest"))+
+  geom_smooth(aes(x = RemovedPercentage, y = IBk, color="IBk"))+
+  labs(x = "Percentage of data",
+       y = "False Positive rate",
+       title = "Learning curve",
+       subtitle = "For Random.Forest && IBk",
+       caption = "graph 7: Learning curve inspected algorithm's"
+       )
+  
+```
 
 
 ```{r, include=FALSE}
@@ -258,42 +320,7 @@ ggplot(data=loss, aes(x=Bone, y=Classify_loss)) +
 ```
 in graph 5 we can see what the importance is from certain bones if we are talking about classification. the diffrences we can see are becouse of their importance for the functionallity of the bird groups.
 
-```{r}
-rocdataW <- read.csv("../data/RocWading.arff", header = F, comment.char = "@", na.strings = "?")
-rocdataWibk <- read.csv("../data/RocWadingIbk.arff", header = F, comment.char = "@", na.strings = "?")
 
-library(ggplot2)
-ggplot()+
-  geom_line(aes(x = rocdataW$V6, y = rocdataW$V7, color="Random.Forest"))+
-  geom_line(aes(x = rocdataWibk$V6, y = rocdataWibk$V7, color="IBk"))+
-  labs(x = "Specificity",
-       y = "Sensitivity",
-       title = "ROC curve",
-       subtitle = "Based on algorithm preformance on Wading bird classification",
-       caption = "Graph 6: ROC"
-       )
-```
-
-```{r}
-RemovedPercentage <- c(10, 20, 30, 40, 50, 60, 70, 80, 90)
-Random.Forest <- c(22.07, 23.27, 25.17, 26.82, 29.17, 32.59, 35.48, 39.24, 47.05)
-IBk <- c(18.26, 19.08, 20.63, 23.01, 25.26, 28.52, 31.58, 35.75, 45.99)
-
-dataf <- data.frame(rev(RemovedPercentage), Random.Forest, IBk)
-dataf <- dataf[seq(dim(dataf)[1],1),]
-
-library(ggplot2)
-ggplot(dataf)+
-  geom_smooth(aes(x = RemovedPercentage, y = Random.Forest, color="Random.Forest"))+
-  geom_smooth(aes(x = RemovedPercentage, y = IBk, color="IBk"))+
-  labs(x = "Percentage of data",
-       y = "False Positive rate",
-       title = "Learning curve",
-       subtitle = "For Random.Forest && IBk",
-       caption = "graph 7: Learning curve inspected algorithm's"
-       )
-  
-```
 
 
 
