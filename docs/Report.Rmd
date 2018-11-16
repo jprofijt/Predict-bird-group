@@ -20,6 +20,22 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Introduction
 
+Are there bones in a bird that are more important for classification using machine learning? Or should we take all avalable information into account if we are creating a classificiaton algorithm using machine learning. And then what algorithm should we use? 
+
+In this research project we will be going through data of varying ecological bird groups. in this data the bone lengths and diameters are provided of an bird with a label to which ecological group they belong. 
+
+Using this data we will be preparing this data for classification, analysing results of different classification algorithms and see how to use the data for classification.
+
+We will be looking into Random.Forest and IBk asl classification algorithms. Random.Forest is tree / decision based and IBk is a K-nearest neigbour classifier(lazy). As IBk is lazy we have to be cautious becouse there might form a bias towards groups with bigger data values.
+
+After we have decided what classfication algorithm to use we can use this research to create a java wrapper application to make use of this classifier in the future if we want to study an unknown fossil ans see what the possible ecological goup is.
+
+
+
+
+
+\newpage
+
 ## Materials & Methods
 
 During this research we used data from an external source, used weka 3.8.0 for classification and R version 3.5.1 in combination with Rstudio for data analysis.
@@ -65,6 +81,25 @@ To begin researching what classification algorithm is the best for our data we f
 
 
 ### Exploratory Data Analysis
+
+The data contains 420 bird samples where the bone lengths and diameters have been measured. 
+The birds are separated in 6 diffrent groups:
+
+  * Swimming Birds, SW 
+  * Wading Birds, W 
+  * Terrestrial Birds, T 
+  * Raptors, R 
+  * Scansorial Birds, P 
+  * Singing Birds, SO 
+
+Most samples have data for:
+
+  * Length and Diameter of the Humerus
+  * Length and Diameter of the Ulna
+  * Length and Diameter of the Femur
+  * Length and Diameter of the Tibiotarsus
+  * Length and Diameter of the Taesometatarsus
+
 ```{r echo=FALSE}
 BirdBones <- read.csv("../data/bird.csv",header = T, sep = ",")
 BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
@@ -299,11 +334,19 @@ in graph 7 we can see what the importance is from certain bones if we are talkin
 
 ## Conclusion & discussion
 
-What is the most important bone for each ecological group their function? we can conclude that (At least for classification) the Femur is the most important as when we remove this from our classification algorithems the accuracy loss is great. we can see this in graph 5 where the loss per bone is displayed. 
-while researching the subject we made the assumption that the Femeur and Taesometatarsus were the least important for classification. Becouse of this the first classification algorithems were done only using the longer bones but further in reverted this desicion. The classification algorithem that was chosen however wasn't changed. In the future we should first collect some data about the importance for some bones before making such rational desisions.
+Are there bones in a bird that are more important for classification using machine learning? Or should we take all avalable information into account if we are creating a classificiaton algorithm using machine learning. And then what algorithm should we use? 
 
-We do wan to think about removing some bones as when we have less data to be put in the more unknown fossils with missing bones could possibly be classified
+To answer part one of the question we can take a look at graph 7 here all different kinds of bones were listed and removed from classification one by one, and the results show that the Tibiotarsus collums in the data are the least important in classificaton. What is suprising is that the femeur which was the smallest from all inspected bones, has the highest classification accuracy loss. 
 
+So if bones are missing in for example the fossil you're investigating the least important one is the Tibiotarsus but it is always preferred to have the most data availalbe.
+
+For the algorithm to use we chose Random.Forest. Altough IBk gives better results the data is skewed and not all groups have the same amount of datapoints. which gave us reason to believe that the data was overfitted to the trainings data.
+
+If we were to redo this classification experiment we would strongly recommend normalizing the data, because as said in our conclusion the data is skewed towards the Sininging and Swimming Birds. use a method that equalizes the amount of datapoints per ecological group so that there is no more data for one type than the oters.
+
+Further we only removed outliers based on the Humerus. it might be worth looking at all available bones for results that differ too much. Also debate on removing datapoints with NA values as it might still be possible to classifiy if only one bone is missing as demonstrated in graph 7. If there is too much missing then yes, remove that instance but only one micht not be that important.
+
+\newpage
 ## Minor Proposal
 
 ## References
