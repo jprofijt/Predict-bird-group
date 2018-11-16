@@ -26,8 +26,16 @@ diameter <- c(3,5,7,9,11)
 ```
 
 # Introduction
+In this research project we will be going through data of varying ecological bird groups. in this data the bone lengths and diameters are provided of an bird with a label to which ecological group they belong. 
+
+Using this data we will be preparing this data for classification, analysing results of different classification algorithms and see how to use the data for classification.
+
+We will be looking into Random.Forest and IBk asl classification algorithms. Random.Forest is tree / decision based and IBk is a K-nearest neigbour classifier(lazy). As IBk is lazy we have to be cautious becouse there might form a bias towards groups with bigger data values.
+
+After we have decided what classfication algorithm to use we can use this research to create a java wrapper application to make use of this classifier in the future if we want to study an unknown fossil ans see what the possible ecological goup is.
+
 # Research Question
-   What bone or group of bones that most birds have in common, is the most significant for the function in the diffrent ecological groups?
+   Are there bones in a bird that are more important for classification using machine learning? Or should we take all avalable information into account if we are creating a classificiaton algorithm using machine learning. And then what algorithm should we use? 
     
 ## Data
     Data recieved from:
@@ -63,7 +71,7 @@ I'm creating a graph which displays the bonelengths on y axis an the Id on x col
 ```{r}
 # this omits several ggplot2 errors retaining to mising values
 BirdBones.noNA <- BirdBones[complete.cases(BirdBones),]
-# Displaing the data frame structure and a small summary
+# Displaying the data frame structure and a small summary
 str(BirdBones)
 summary(BirdBones)
 ```
@@ -82,6 +90,8 @@ ggplot(data = BirdBones.noNA, aes(id, length.mean, colour = type)) +
   geom_point()
 ```
 As seen above swimming birds have the biggest bones, but also shown is that there are a lot more samples in that group where there is a lot of variation. I can look into cleaning up the data and removing the biggest outliers in this group. Singing birds also have a lot of samples but there is much less variation and so more certanty. 
+
+Note: this plot does not show a perfect classifier, this data is sorted.
 
 For the rest of the birds there are not a lot of sample so maby we could try and normalizing the data so there is an even amount of samples per group.
 
@@ -139,6 +149,16 @@ ggplot(BirdBones.noNA,aes(x=length.mean,y=diameter.mean,color=type))+
 ```
 
 Untransformed datapoints separated by goup, again here we can see which birds are the biggest, but for smaller birds this plot is not very readable. we do see something odd, where T has a climbing line around lenght 50, other birds have a decreasing line. also Swimming Birds have some results that are very diffrent form their mean line.
+```{r}
+ggplot(BirdBones.noNA.long,aes(x=log2(length.mean),y=log2(diameter.mean),color=type))+
+  geom_point()+
+  geom_smooth(method = loess)+
+  xlab("Log2 Mean Lenght")+
+  ylab("Log2 Mean Diameter")+
+  labs(title = "Log2 transformed data"
+       )
+```
+
 
 
 
@@ -204,18 +224,20 @@ Same plot as above but colorcoded so we can see to which group the outliers belo
 #  geom_point(data=centers, aes(x=V1,y=V2, color='Center'), size=50, alpha=.4, legend=FALSE)
 ```
 ```{r}
-library(ggplot2)
-library(pheatmap)
-df.hum <- data.frame(log2(BirdBones.noNA$huml), log2(BirdBones.noNA$humw))
-kmeans.hum <- kmeans((df.hum), 6)
+# library(ggplot2)
+# library(pheatmap)
+# df.hum <- data.frame(log2(BirdBones.noNA$huml), log2(BirdBones.noNA$humw))
+# kmeans.hum <- kmeans((df.hum), 6)
+# 
+# dm.len <- data.matrix(BirdBones.noNA[length])
+# dm.dia <- data.matrix(BirdBones.noNA[diameter])
+# 
+# pheatmap(dm.len, kmeans_k = 6)
+# pheatmap(dm.dia, kmeans_k = 6)
+# plot(kmeans.hum$cluster)
+# plot(kmeans.hum$centers)
 
-dm.len <- data.matrix(BirdBones.noNA[length])
-dm.dia <- data.matrix(BirdBones.noNA[diameter])
-
-pheatmap(dm.len, kmeans_k = 6)
-pheatmap(dm.dia, kmeans_k = 6)
-plot(kmeans.hum$cluster)
-plot(kmeans.hum$centers)
+# Removed these as they dont really add much value to the research
 ```
 
 For data cleaning we already have a dataset without NA's(BirdBones.NoNA). now we need to remove the found outliers and discard the unneeeded bones.
@@ -558,7 +580,6 @@ experimenter_data <- read.csv("../data/AlgorithemPreformance.csv", header = T, s
 ```
 
 From my analyses im going to choose Random.Forest as classifier algorithem. altough IBk gives a higher accuracy because we haven't normalised the data using nearest neighbour isn't reliable and thats why we shouldn't use it. 
-
 
 To give an answer to the research question we need to run a few more weka experiments with Random forest. We want to see what bone in the birds have te most inpact on classification accuracy.
 

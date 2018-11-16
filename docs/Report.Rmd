@@ -30,6 +30,12 @@ We will be looking into Random.Forest and IBk asl classification algorithms. Ran
 
 After we have decided what classfication algorithm to use we can use this research to create a java wrapper application to make use of this classifier in the future if we want to study an unknown fossil ans see what the possible ecological goup is.
 
+### github pages
+
+This research was updated and maintainded until nov 16 2018 on [(link)github](https://github.com/jprofijt/Predict-bird-group)
+
+and an application that was based on the research was made and maintained on [(link)github-javaApplicaton](https://github.com/jprofijt/Predict-bird-group-java)
+
 
 
 
